@@ -3,10 +3,8 @@
 B=$(readlink -f "$0")
 export P=${B%/*}
 
-if [ ! -r /bin/links-fcts ]
-then
-  ln -s "$P/bash/links-fcts" ~/bin/links-fcts
-fi
+[ ! -r /bin/colors ] && ln -s "$P/bash/colors" ~/bin/colors
+[ ! -r /bin/links-fcts ] && ln -s "$P/bash/links-fcts" ~/bin/links-fcts
 
 source "$HOME/bin/links-fcts" || exit 1
 
