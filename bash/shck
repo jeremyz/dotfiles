@@ -1,0 +1,15 @@
+#! /usr/bin/env bash
+
+if ! (which shellcheck 2>/dev/null)
+then
+  echo "shellcheck is missing" && exit 1
+fi
+
+find . -type f ! -name \*~ | while read -r fp
+do
+  if (head -n1 "$fp" | grep -qE "sh *$")
+  then
+    echo -e "\n ************** CHECK : $fp ..."
+    shellcheck "$fp"
+  fi
+done

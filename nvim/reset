@@ -1,0 +1,9 @@
+#! /usr/bin/env bash
+
+rm -fr ~/.config/nvim/
+rm -fr ~/.local/share/nvim
+mkdir -p ~/.config/nvim/
+ln -sf ~/_wip/projects/dotfiles/nvim/lua ~/.config/nvim/lua
+#ln -sf ~/_wip/projects/dotfiles/nvim/after ~/.config/nvim/after
+ln -sf ~/_wip/projects/dotfiles/nvim/init.lua ~/.config/nvim/init.lua
+ls -l ~/.config/nvim

@@ -1,0 +1,11 @@
+gtk-theme:
+    https://www.gnome-look.org/browse/cat/135/
+
+e-settings:
+    Look
+        Application theme:
+            Enable X Application setting -> apply theme / otherqise uses .Xresources
+        Scaling Advanced
+            Set Aplpication Dpi -> works with theme
+
+

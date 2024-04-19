@@ -1,0 +1,14 @@
+#! /usr/bin/env bash
+
+# LOGIN_N=$(who | grep tty | grep -c "$USER")
+# if [[ $LOGIN_N -eq 1 ]]
+# then
+#   PIDS=$(pidof ssh-agent)
+#   if [[ -n ${PIDS} ]]
+#   then
+#     for PID in ${PIDS}; do
+#       kill "${PID}" 2>/dev/null
+#     done
+#   fi
+#   rm .shh/environment pgadmin.log oradiag_*
+# fi

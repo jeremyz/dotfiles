@@ -1,0 +1,203 @@
+#!/bin/bash
+
+# /etc/ld.so.conf.d/efl.conf:
+#   /opt/efl/lib
+# /etc/profile.d/efl.sh:
+#   export EFLDIR=/opt/efl
+#   export PATH=$PATH:$EFLDIR/bin
+#   export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$EFLDIR/lib/pkgconfig
+#   #export XDG_DATA_DIRS=$XDG_DATA_DIRS:$EFLDIR/share
+
+set -e
+shopt -s expand_aliases
+
+MAKE_J="-j5"
+export TERM=xterm-color
+
+if [ -z "${PREFIX}" ]
+then
+   echo "you must at least set PREFIX var"
+   exit 1
+fi
+
+RESET="\033[0m"
+RED="\033[0;31m"
+GREEN="\033[0;32m"
+BROWN="\033[0;33m"
+PURPLE="\033[0;35m"
+
+export CC=${CC:-"ccache gcc"}
+export CFLAGS=${CFLAGS:-"-O2 -march=native -ffast-math -W -Wall -Wextra -Wshadow -Wstrict-prototypes"} # -ggdb3
+
+export PATH=$PREFIX/bin:$PATH
+export LD_LIBRARY_PATH=$PREFIX"/lib"
+export PKG_CONFIG_PATH=$PREFIX"/lib/pkgconfig"
+
+GIT_PULL=${GIT_PULL:-1}
+BUILD_ANYWAY=${BUILD_ANYWAY:-0}
+BUILD_DIR=${BUILD_DIR:-"build"}
+USE_BUILD_DIR=${USE_BUILD_DIR:-1}
+TRY_CMAKE=${TRY_CMAKE:-1}
+
+TAGS_PATH=$HOME"/share/ctags/efl.tags"
+
+CLEAN_LEVEL=0
+for arg in "$@"; do
+    if [ "$arg" = "+c" ]; then CLEAN_LEVEL=$((CLEAN_LEVEL+1)); fi
+    if [ "$arg" = "-c" ]; then CLEAN_LEVEL=$((CLEAN_LEVEL-1)); fi
+    if [ "$arg" = "+p" ]; then GIT_PULL=1; fi
+    if [ "$arg" = "-p" ]; then GIT_PULL=0; fi
+    if [ "$arg" = "+b" ]; then BUILD_ANYWAY=1; fi
+    if [ "$arg" = "-b" ]; then BUILD_ANYWAY=0; fi
+done
+
+function say()
+{
+    cmd=$1
+    echo -e " $BROWN* $GREEN$cmd$RESET ..."
+}
+
+function exec_cmd()
+{
+    cmd=$1
+    say "$cmd" && $cmd
+}
+
+function fatal()
+{
+    cmd=$1
+    echo -e "$PURPLE$cmd$RESET miserably$RED FAILED$RESET"
+    exit 1
+}
+
+function get_sudo_pwd()
+{
+    echo -e "\n==== $RED SUDO$RESET PASSWD"
+    sudo_test=/tmp/_sudo.test
+    echo -n "enter sudo-password: " && stty -echo && read -r SUDO_PASSWD && stty echo || exit 1
+    echo "$SUDO_PASSWD" | sudo -S touch $sudo_test
+    if [ ! -e $sudo_test ]
+    then
+        fatal "cmdline provided sudo password failed!"
+    else
+        sudo rm -f $sudo_test
+    fi
+    echo
+}
+
+function build()
+{
+   local src_dir=$1
+   local autogen_flags=" --prefix=${PREFIX} $2"
+   local extra=$3
+
+   local use_make=0
+   local use_meson=0
+   local try_cmake=$TRY_CMAKE
+   local use_build_dir=$USE_BUILD_DIR
+   for ef in $extra; do
+      [ "$ef" = "USE_MAKE" ] && use_make=1
+      [ "$ef" = "USE_MESON" ] && use_meson=1
+      [ "$ef" = "NO_CMAKE" ] && try_cmake=0
+      [ "$ef" = "NO_BUILD_DIR" ] && use_build_dir=0
+   done
+
+   local build_dir="$src_dir"
+   [ "$use_build_dir" -eq 1 ] && build_dir="$src_dir/$BUILD_DIR/"
+
+   local do_build=$BUILD_ANYWAY
+
+   echo -e "\n==== work on $PURPLE${src_dir##*/}$RESET in $GREEN$build_dir$RESET"
+   pushd "$src_dir" > /dev/null || fatal "pushd"
+
+   if [ "$GIT_PULL" -eq 1 ]
+   then
+      echo -e "  $RED:: git pull$RESET"
+      local STASH=$(git stash | grep -c Saved)
+      git checkout master
+      local HEAD_PREV=$(git log HEAD~1.. --pretty=format:'%H')
+      git pull --rebase origin
+      local HEAD_AFTER=$(git log HEAD~1.. --pretty=format:'%H')
+      [ "$STASH" -gt 0 ] && git stash pop
+      [ "$HEAD_PREV" != "$HEAD_AFTER" ] && do_build=1
+   fi
+
+   if [ "$do_build" -gt 0 ] && [ "$use_make" -eq 1 ]
+   then
+      do_make "$2"
+   elif [ "$do_build" -gt 0 ] && [ "$use_meson" -eq 1 ] && [ -f "meson.build" ]
+   then
+      do_meson "$2"
+   elif [ "$do_build" -gt 0 ]
+   then
+      local configure="./configure"
+      local autogen="./autogen.sh"
+      local cmakedir="./"
+      local cmakefile="./CMakeLists.txt"
+
+      echo -e "  $RED:: clean $RESET"
+      [ $CLEAN_LEVEL -ge 4 ] && [ -d "$BUILD_DIR" ] && exec_cmd "rm -fr $BUILD_DIR" 2>/dev/null
+      if [ "$use_build_dir" -eq 1 ]
+      then
+         [ ! -d "$BUILD_DIR" ] && ( mkdir "$BUILD_DIR" || fatal "mkdir" )
+         pushd "$BUILD_DIR" >/dev/null || fatal "pushd"
+         configure=".$configure"
+         cmakedir=".$cmakedir"
+         cmakefile=".$cmakefile"
+      fi
+
+      [ $CLEAN_LEVEL -ge 2 ] && [ -f Makefile ] && exec_cmd "make distclean" >/dev/null
+      [ $CLEAN_LEVEL -ge 1 ] && [ -f Makefile ] && exec_cmd "make clean" >/dev/null
+      if [ $CLEAN_LEVEL -ge 5 ] && [ -f "$autogen" ]
+      then
+         say "$autogen" && NOCONFIGURE=1 $autogen >/dev/null 2>&1
+         [ -f "$configure" ] || fatal "no $configure -> no can do !!!"
+      fi
+      if [ $CLEAN_LEVEL -ge 3 ] || [ ! -f Makefile ]
+      then
+         if [ "$try_cmake" -eq 1 ] && [ -f "$cmakefile" ]
+         then
+            exec_cmd "cmake $cmakedir -DCMAKE_INSTALL_PREFIX:PATH=${PREFIX}" || fatal "cmake"
+         else
+            exec_cmd "$configure $autogen_flags" || fatal "configure"
+         fi
+      fi
+
+      echo -e "  $RED:: build $RESET"
+      exec_cmd "make $MAKE_J" || fatal "make"
+      echo -e "  $RED:: install $RESET"
+      (say "make install" && echo "$SUDO_PASSWD" | sudo -S make install >/dev/null 2>&1 )|| fatal "make install"
+      echo "$SUDO_PASSWD" | sudo -S ldconfig
+      [ "$use_build_dir" -eq 1 ] && popd
+   fi
+
+   popd
+}
+
+function do_make()
+{
+    echo -e "  $RED:: build $RESET"
+    exec_cmd "make $MAKE_J" || fatal "make"
+    echo -e "  $RED:: install $RESET"
+    (say "make install" && echo "$SUDO_PASSWD" | sudo -S make install >/dev/null 2>&1) || fatal "make install"
+}
+
+function do_meson()
+{
+   local mesontoken="build/meson-private/coredata.dat" # mesonmain.py#validate_dirs
+   echo -e "  $RED:: clean $RESET"
+   [ $CLEAN_LEVEL -ge 4 ] && [ -d "$BUILD_DIR" ] && exec_cmd "rm -fr $BUILD_DIR" 2>/dev/null
+   if [ ! -f "$mesontoken" ]
+   then
+      exec_cmd "meson --prefix=${PREFIX} $1 $BUILD_DIR" || fatal "meson"
+   else
+      [ $CLEAN_LEVEL -ge 3 ] && ( exec_cmd "meson configure --clearcache $BUILD_DIR" || fatal "meson configure" )
+   fi
+   echo "$SUDO_PASSWD" | sudo -S chown "$USER" "$BUILD_DIR/.ninja_deps" "$BUILD_DIR/.ninja_log" || true
+   [ $CLEAN_LEVEL -ge 1 ] && [ $CLEAN_LEVEL -lt 4 ] && [ -f "$BUILD_DIR/build.ninja" ] && exec_cmd "ninja -C $BUILD_DIR clean"
+   echo -e "  $RED:: build $RESET"
+   exec_cmd "ninja -C $BUILD_DIR" || fatal "ninja"
+   echo -e "  $RED:: install $RESET"
+   (say "ninja -C $BUILD_DIR install" && echo "$SUDO_PASSWD" | sudo -S ninja -C "$BUILD_DIR" install >/dev/null 2>&1) || fatal "make install"
+   echo "$SUDO_PASSWD" | sudo -S ldconfig
+}

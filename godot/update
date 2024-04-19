@@ -1,0 +1,134 @@
+#! /usr/bin/env bash
+
+# https://godot-build-options-generator.github.io
+
+# archlinux setup :
+# yay -S jre8-openjdk-headless jdk17-openjdk
+# yay -S android-sdk android-sdk-platform-tools
+#  archlinux-java set java-8-openjdk/jre
+#  sdkmanager "ndk;23.2.8568313"
+#  sdkmanager "cmake;3.18.1"
+#  sdkmanager "build-tools;34.0.0"
+#  sdkmanager "platforms;android-34" -- duplicate of arch's package
+#  archlinux-java set java-17-openjdk
+
+RED="\033[0;31m"
+RESET="\033[0m"
+
+SRC_DIR=godot-master
+
+FORCE=0
+CLEAN=0
+ANDROID=0
+
+VERSION=4
+TEMPLATE_DIR=$HOME/.local/share/godot/export_templates
+TEMPLATE_DIR=$TEMPLATE_DIR/$VERSION.x
+
+platform=linuxbsd
+target=editor
+targets="template_release template_debug"
+common_flags="use_llvm=yes linker=lld debug_symbols=no lto=none use_static_cpp=no" # arch does not provide libatomic.a through gcc-libs
+linux_flags="tools=yes colored=yes pulseaudio=no bits=64 warnings=no" #custom_modules=../modules
+
+#export CXX=/usr/lib/ccache/bin/clang++
+#export CC=/usr/lib/ccache/bin/clang
+#export ANDROID_HOME=/opt/android-sdk
+#export ANDROID_NDK_ROOT=/opt/android-ndk
+
+for I in  "$@"
+do
+  case $I in
+    f)
+      FORCE=1
+      ;;
+    a)
+      ANDROID=1
+      ;;
+    c)
+      CLEAN=1
+      ;;
+  esac
+done
+
+if [ "$ANDROID" -eq 1 ]
+then
+  jdk_version=$(archlinux-java get)
+  if [[ ! $jdk_version =~ "java-17-openjdk" ]]
+  then
+    echo "wrong JDK ${jdk_version}"
+    echo "java-17-openjdk is required"
+    exit 1
+  fi
+fi
+
+function build()
+{
+  #[ -f custom.py ] && rm custom.py
+  rm ./bin/*
+  [ $CLEAN -eq 1 ] && scons --clean
+
+  # https://docs.huihoo.com/godotengine/godot-docs/godot/reference/compiling_for_x11.html
+  echo -e "build : ${RED}$platform$RESET target=$RED$target$RESET"
+  # shellcheck disable=SC2086
+  time scons platform=$platform target=$target $linux_flags $common_flags #warnings=no #custom_modules=../modules
+
+  if [ $ANDROID -eq 1 ]
+  then
+    #[ -f ../custom.py ] && cp ../custom.py .
+    [ ! -d "$TEMPLATE_DIR" ] && mkdir "$TEMPLATE_DIR"
+
+    # https://docs.huihoo.com/godotengine/godot-docs/godot/reference/compiling_for_android.html
+    [ $CLEAN -eq 1 ] && (pushd platform/android/java && echo -e "${RED}gradlew clean$RESET" && ./gradlew --no-daemon cleanGodotTemplates && popd || exit 1)
+    for target in $targets;
+    do
+      for arch in arm64v8 armv7; #x86_6
+      do
+        if [ $VERSION == 3 ]
+        then
+          aarch="android_arch"
+        else
+          aarch="arch"
+        fi
+        echo -e "build : ${RED}android$RESET $aarch=$RED$arch$RESET target=$RED$target$RESET"
+        # shellcheck disable=SC2086
+        time scons platform=android target="$target" $aarch="$arch" tools=no disable_3d=true $common_flags
+      done
+    done
+    pushd platform/android/java || exit 1
+    echo -e "${RED}gradlew build$RESET" && ./gradlew --no-daemon build
+    echo -e "${RED}gradlew generateGodotTemplates$RESET" && ./gradlew --no-daemon generateGodotTemplates
+    popd || exit 1
+
+    cp bin/android* "$TEMPLATE_DIR/"
+    rm custom.py
+  fi
+}
+
+cd $SRC_DIR || exit 1
+
+if [ $CLEAN -eq 1 ]
+then
+  find . -name \*.o -delete
+  find . -name \*.gen.h -delete
+  find . -name \*.gen.cpp -delete
+fi
+
+HEAD_PREV=$(git log HEAD~1.. --pretty=format:'%H' | head -n1)
+echo -e "current HEAD : $RED$HEAD_PREV$RESET"
+git pull
+HEAD_NOW=$(git log HEAD~1.. --pretty=format:'%H' | head -n1)
+echo -e "updated HEAD : $RED$HEAD_NOW$RESET"
+
+if [ $FORCE = 1 ] || [ "$HEAD_PREV" != "$HEAD_NOW" ]
+then
+  build
+  git log "$HEAD_PREV"..
+fi
+
+strip ./bin/godot.*
+ls -lh ./bin/
+git_gc _godot_build
+
+# scons -j4 platform=linuxbsd target=release_debug tools=yes pulseaudio=no bits=64 warnings=no #custom_modules=../modules
+# scons -j4 platform=android target=debug android_arch=arm64v8 tools=no disable_3d=true

@@ -1,0 +1,31 @@
+#! /usr/bin/env bash
+
+[ $# -lt 1 ] && echo "usage $0 pkg_list (generated with pacman -Q)" && exit 1
+INPUT=$1
+
+tmp=/tmp/__pkgs
+bad=/tmp/__pkgs-bad
+[ -e "$tmp" ] && rm "$tmp"
+[ -e "$bad" ] && rm "$bad"
+
+echo " * read package list"
+gawk '{ print $1 }' "$INPUT" | while read -r pkg
+do
+    pacman -Q "$pkg" >/dev/null 2>&1 || echo "$pkg" >> "$tmp"
+done
+
+[ ! -e "$tmp" ] && echo " * all good" && exit 0
+
+echo " * install packages"
+if ! (pacman -S "$(cat $tmp)" >/dev/null 2>&1)
+then
+    echo " * clean package list"
+    pacman -S "$(cat $tmp)" 2>&1 | cut -d ':' -f 3 > $bad
+    cat $bad | while read -r pkg; do sed -i "/$pkg/d" "$tmp"; done
+    echo " * install packages"
+    [ -s "$tmp" ] && pacman -S "$(cat $tmp)"
+fi
+pacman -Scc
+[ -r $tmp ] && echo "installed packages in $tmp"
+[ -r $bad ] && echo "failed packages in $bad"
+echo " * done"

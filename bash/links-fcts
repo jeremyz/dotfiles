@@ -1,0 +1,78 @@
+#! /usr/bin/env bash
+
+source "$HOME/bin/colors" || exit 1
+
+function formatld() {
+  lnk="${1//$HOME\/}"
+  for lpat in "${!LNK_PATTERNS[@]}"
+  do
+    if [[ "$lnk" =~ $lpat ]]
+    then
+      # shellcheck disable=SC2295
+      before="${lnk%%/$lpat/*}"
+      # shellcheck disable=SC2295
+      after="${lnk#*$lpat/}"
+      echo -e "$before/${LNK_PATTERNS[$lpat]}${lpat}${RESET}/${GREEN}$after${RESET}"
+      return
+    fi
+  done
+  echo "$lnk"
+}
+
+function formatls() {
+  lnk="${1//$HOME\/}"
+  [ -z "$2" ] && echo -e "${BROWN}~${RESET}${GREEN}$lnk${RESET}" && return
+  # shellcheck disable=SC2295
+  after="${lnk#*$2/}"
+  echo -e "${BROWN}~/$2${RESET}/${GREEN}$after${RESET}"
+}
+
+function show() {
+  lnks=$(formatls "$1" "$2")
+  lnk=$(readlink "$1")
+  lnkf=$(formatld "$lnk")
+  if [[ -r $lnk ]]
+  then
+    printf "%62s -> %s\n" "$lnks" "$lnkf"
+  else
+    printf "$RED%40s $RESET-> %s\n" "~${1//$HOME}" "$lnk"
+  fi
+}
+
+function good() {
+  lnk=$(readlink "$1")
+  printf "$GREEN%40s $GRAY ->  $BROWN%s$RESET\n" "${1//$HOME\/}" "${lnk//$HOME\/}"
+}
+
+function bad() {
+  lnk=$(readlink "$1")
+  printf "$RED%40s $GRAY ->  $BROWN%s$RESET\n" "${1//$HOME\/}" "${lnk//$HOME\/}"
+}
+
+function link() {
+  dir=${2%/*}
+  [ "$dir" != "$2" ] && [ ! -d "$HOME/$dir" ] && mkdir -p "$HOME/$dir"
+  target="$P/$1"
+  lnk="$HOME/$2"
+  if [ -f "$lnk" ] || [ -d "$lnk" ]
+  then
+    rlnk=$(readlink "$lnk")
+    if [ "$rlnk" = "$target" ]
+    then
+      good "$lnk"
+    else
+      bad "$lnk"
+    fi
+  else
+    ln -sf "$target" "$lnk"
+    good "$lnk"
+  fi
+}
+
+function bin() {
+  fn="${1##*/}"
+  target="$P/$1"
+  lnk="$HOME/bin/$fn"
+  [ -r "$lnk" ] && rm "$lnk"
+  ln -s "$target" "$lnk"
+}

@@ -1,0 +1,15 @@
+image/bmp; geeqie %s;
+image/png; geeqie %s;
+image/jpg; geeqie %s;
+image/jpeg; geeqie %s;
+image/pjpeg; geeqie %s;
+image/gif; geeqie %s;
+image/anus; geeqie %s;
+audio/mpeg; mpv %s;
+video/mpeg; mpv %s;
+video/x-msvideo; mpv %s;
+video/x-ms-wmv; mpv %s;
+application/pdf; evince %s;
+application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; soffice %s
+application/vnd.openxmlformats-officedocument.wordprocessingml.document; soffice %s
+text/html; lynx -dump %s; nametemplate=%s.html; copiousoutput;

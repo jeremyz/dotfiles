@@ -1,0 +1,42 @@
+#! /bin/bash
+
+NETCTL=$(which netctl)
+if [ -z "$NETCTL" ]
+then
+    echo "netctl not found"
+    exit 1
+fi
+if [ "$UID" -ne 0 ]
+then
+    echo "must be run as root"
+    exit 1
+fi
+if [ $# -gt 0 ]
+then
+    profile=$1
+else
+    PROFILES=$($NETCTL list | sed 's/\*//' | sort)
+    select profile in $PROFILES
+    do
+        [ -z "$profile" ] && exit 0
+        break
+    done
+fi
+if [ ! -r "/etc/netctl/$profile" ]
+then
+    echo "unknown network profile : $profile" && exit 1
+fi
+$NETCTL stop-all
+echo "starting profile $profile" && sleep 1 && "$NETCTL" start "$profile" || exit 1
+N=0
+dev=$(sed -n 's/Interface\=\(.*\)/\1/p' < "/etc/netctl/$profile")
+ADDR=""
+while [ -z "$ADDR" ]
+do
+    N=$((N + 1))
+    [ $N -eq 15 ] && echo " failure" && exit 1
+    echo -n "." && sleep 1
+    ADDR=$(ip -4 -c addr show dev "$dev" | sed -n '/inet/p')
+done
+echo
+echo "$ADDR"

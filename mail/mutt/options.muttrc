@@ -1,0 +1,71 @@
+# vim:ft=muttrc:
+
+# ORDER
+ignore *
+unignore from date subject to cc reply-to
+unhdr_order *
+hdr_order from date subject to cc reply-to
+set sort=threads
+set sort_aux=last-date-received
+set sort_browser=reverse-date
+set duplicate_threads=yes
+set mark_old=no
+
+# EXPR
+set quote_regexp="^([ \t]*[|>:}%])+|^[a-zA-Z]{,9}>"
+set status_format="%h %v  %r  %f  [Msgs:%?M?%M/?%m%?n?  New:%n?%?o?  Old:%o?%?d?  Del:%d?%?F?  Flag:%F?%?t?  Tag:%t?%?p?  Post:%p?%?b?  Inc:%b?%?l?  %l?]   (%V)   (%s/%S) %> (%P)"
+
+# THREADS
+set uncollapse_jump = yes
+unset collapse_unread
+
+# VISUAL
+set help=no
+set read_inc=5
+set write_inc=5
+set status_on_top=yes
+set pager_index_lines=15
+
+# MAILCAP
+alternative_order text/plain text/enriched text/html
+set implicit_autoview
+auto_view text/html
+set mailcap_path="~/.mailcap"
+
+# READ AND SENT
+#set mbox=+mbox
+#set move=yes
+#set record="+sent-`date +%Y`"
+folder-hook . 'set record="^"'
+set postponed=+postponed
+
+# REPLY
+set reverse_name=yes
+set attribution="On %d, %n wrote :"
+set include=yes
+set indent_str="> "
+set followup_to=no
+
+# SEND
+set edit_headers=yes
+set charset="utf-8"
+set send_charset="utf-8"
+#set locale="en_US.UTF-8"
+
+set fast_reply
+set ispell="aspell --mode=email check --lang=fr"
+
+# Folders compresss
+# open-hook \\.gz$ "gzip -cd %f > %t"
+# close-hook \\.gz$ "gzip -c %t > %f"
+# append-hook \\.gz$ "gzip -c %t >> %f"
+
+# ATTACHEMENT
+set mime_forward=ask-yes
+set forward_decode=yes
+set mime_forward_decode=no
+
+auto_view text/html
+auto_view application/x-gzip
+alternative_order text/plain text/enriched text/html
+

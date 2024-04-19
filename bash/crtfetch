@@ -1,0 +1,24 @@
+#! /usr/bin/env bash
+
+B=$(basename "$0")
+if [ $# -eq 0 ]
+then
+  echo "$B sever_name [port]" && exit 1
+fi
+SRV=$1
+PORT=443
+if [ $# -gt 1 ]
+then
+  PORT=$2
+fi
+case $PORT in
+  25)
+    OPTS="-starttls smtp" ;;
+esac
+logf="/tmp/$B-$SRV-$PORT.log"
+crtf="/tmp/$B-$SRV-$PORT.crt"
+# shellcheck disable=SC2086
+openssl s_client -connect "$SRV:$PORT" $OPTS < /dev/null 2>"$logf" | openssl x509 -outform pem 2>"$logf" > "$crtf"
+echo "log : $logf"
+echo "crt : $crtf"
+cat "$crtf"

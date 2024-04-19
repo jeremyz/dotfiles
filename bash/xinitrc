@@ -1,0 +1,22 @@
+#! /usr/bin/env bash
+
+#-profile profile.9.cfg"
+# -locked -profile profile.9.cfg"
+WMNG=/opt/efl/bin/enlightenment_start
+# WMNG=fluxbox
+
+${WIN:-$WMNG} & PID=$!
+
+# toooo annaying
+# if [ "$(which xkblayout-state 2>/dev/null)" ]
+# then
+#   sleep 1
+#   if [ "$(xkblayout-state print '%s')" = "ch" ]
+#   then
+#     setxkbmap -option ctrl:swapcaps
+#   else
+#     setxkbmap -option
+#   fi
+# fi
+
+wait ${PID}

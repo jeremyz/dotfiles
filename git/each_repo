@@ -1,0 +1,30 @@
+#! /usr/bin/env bash
+
+RESET="\033[0m"
+RED="\033[0;31m"
+BROWN="\033[0;33m"
+
+WHERE=""
+CMD="git status"
+while [ $# -gt 0 ]; do
+   if [ "$1" = "-" ]; then
+      shift
+      CMD=$*
+      break 2
+   else
+      WHERE="$WHERE $1"
+      shift
+   fi
+done
+
+WHERE=${WHERE:-.}
+echo "exec '$CMD' on '$WHERE' repos [Ctrl-c to abort]" && read -r
+
+find "$WHERE" -maxdepth 5 -type d -name .git | while read -r path
+do
+   path=${path%.git}
+   echo -e "$BROWN## $RED$path$RESET"
+   pushd "$path" >/dev/null || exit 1
+   $CMD
+   popd > /dev/null || exit 1
+done

@@ -1,0 +1,66 @@
+#! /usr/bin/env bash
+
+DIR=$HOME/usr/git/efl
+export PREFIX=/opt/efl
+export LOCAL_CONF=$DIR/efl-build.conf
+
+source "$HOME/bin/efl-build-fcts"
+[ -r $LOCAL_CONF ] && source $LOCAL_CONF
+
+declare -a cfgs=(efl e terminology evisum rage ephoto)
+declare -A build_cfgs=(
+["efl",0]="core/efl"
+["efl",1]="-Defl-one=true -Doptimization=2 -Dharfbuzz=true -Dbuild-examples=false -Dbuild-tests=false -Ddrm=true -Dwl=true -Dbindings="
+["efl",2]="USE_MESON"
+["e",0]="core/enlightenment"
+["e",1]="-Dwl=true"
+["e",2]="USE_MESON"
+["terminology",0]="apps/terminology"
+["terminology",2]="USE_MESON"
+["evisum",0]="apps/evisum"
+["evisum",2]="USE_MESON"
+["rage",0]="apps/rage"
+["rage",2]="USE_MESON"
+["ephoto",0]="apps/ephoto"
+["ephoto",2]="USE_MESON"
+
+["clouseau",0]="tools/clouseau"
+["eruler",0]="apps/eruler"
+["extra",0]="apps/extra"
+["extra",2]="USE_MESON"
+["profiler",0]="devs/nikawhite/efl_profiler_viewer"
+["enventor",0]="tools/enventor"
+["edi",0]="tools/edi"
+["edi",2]="USE_MESON"
+["eflete",0]="tools/eflete"
+["eflete",1]="--enable-enventor"
+["theme_viewer",0]="tools/elm-theme-viewer"
+)
+
+function build_cfg()
+{
+  cfg=$1
+  build "${build_cfgs["$cfg",0]}" "${build_cfgs["$cfg",1]}" "${build_cfgs["$cfg",2]}"
+}
+
+function build_all()
+{
+  for cfg in "${cfgs[@]}"
+  do
+    build_cfg "$cfg"
+    git_gc "_efl_$(echo "${build_cfgs["$cfg",0]}" | tr '/' '_')"
+  done
+}
+
+cd "$DIR" || exit 1
+built=0
+get_sudo_pwd
+for arg in "$@"
+do
+  for cfg in "${cfgs[@]}"
+  do
+    [ -z "$arg" ] && built=1 && build_cfg "$cfg"
+  done
+done
+[ $built -eq 0 ] && build_all
+echo -e "\n==== DONE\n"

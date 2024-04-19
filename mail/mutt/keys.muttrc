@@ -1,0 +1,50 @@
+# vim:ft=muttrc:
+bind generic,compose,attach,pager,index g noop
+bind generic,compose,attach,pager,index G noop
+bind generic,compose,attach,pager,index t noop
+bind generic,compose,attach,pager,index s noop
+bind generic,compose,attach,pager,index d noop
+bind generic,compose,attach,pager,index z noop
+
+# Moving around
+bind attach,browser,index       gg  first-entry
+bind attach,browser,index       G   last-entry
+bind attach,browser,index       s   previous-entry
+bind attach,browser,index       t   next-entry
+
+bind pager                      gg  top
+bind pager                      G   bottom
+bind pager                      s   previous-line
+bind pager                      t   next-line
+
+bind index,pager                S   sidebar-prev
+bind index,pager                T   sidebar-next
+bind index,pager                C   sidebar-open
+
+bind attach                     z   save-entry
+bind index,pager                z   save-message
+
+# Scrolling
+#bind attach,browser,pager,index \Cu half-up
+#bind attach,browser,pager,index \Cd half-down
+#bind attach,browser,pager,index \CF next-page
+#bind attach,browser,pager,index \CB previous-page
+#bind browser,pager              \Ce next-line
+#bind browser,pager              \Cy previous-line
+#bind index                      \Ce next-line
+#bind index                      \Cy previous-line
+
+bind pager,index                d  delete-message
+
+# Mail & Reply
+bind pager,index                gr  group-reply
+#bind index                      \Cm list-reply        # Doesn't work currently
+
+# Threads
+bind browser,pager,index        N   search-opposite
+#bind pager,index                dT  delete-thread
+#bind pager,index                dt  delete-subthread
+bind pager,index                gt  next-thread
+bind pager,index                gT  previous-thread
+bind index                      ,a  collapse-thread
+bind index                      ,A  collapse-all      # Missing :folddisable/foldenable

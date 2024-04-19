@@ -1,0 +1,37 @@
+# vim:ft=muttrc:
+
+# colors
+# color normal        default         default
+color attachment    yellow          default
+color indicator     color200          brightblack
+# color bold          brightdefault   default
+# color error         cyan            default
+# color hdrdefault    cyan            default
+# color indicator     default         cyan
+# color markers       green           default
+# color message       cyan            default
+# color signature     cyan            default
+# color status        brightgreen     blue
+# color tilde         blue            default
+# color tree          red             default
+# color underline     brightdefault   default
+
+color hdrdefault    white           default
+color header        green           default "^Date:"
+color header        brightcyan      default "^(Reply|Mail-Followup)-To:"
+color header        brightgreen     default "^To:|^Cc:|^Bcc:"
+color header        brightyellow    default "^From[: ]"
+color header        brightred       default "^Subject:"
+color header        brightblue      default "^[^:]*-Agent:|^[^:]*-Mailer:"
+color header        yellow          default "^X-[^:]*:"
+color header        blue            yellow  "^List-Id:"
+
+color normal        green           default
+color quoted        brightred       default
+color quoted1       blue            default
+color quoted2       cyan            default
+color quoted3       color23         default
+color body          red             default [\-\.+_a-zA-Z0-9]+@[\-\.a-zA-Z0-9]+
+color body          red             default (https?|ftp)://[\-\.\,/%&~_:?\#=a-zA-Z0-9]+
+color body          brightyellow    default ".*said:$"
+color body          brightyellow    default ".*wrote:$"

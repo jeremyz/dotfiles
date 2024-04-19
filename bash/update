@@ -1,0 +1,81 @@
+#! /usr/bin/env bash
+
+RESET="\033[0m"
+RED="\033[0;31m"
+CYAN="\033[0;36m"
+
+# shellcheck disable=SC2046
+ssh-add -l | grep -q 'no identities' && ssh-add $(find ~/.ssh -name \*.pub | sed 's/\.pub.*//g' | tr '\n' ' ')
+
+if [ $# -lt 1 ]; then
+    echo "missing passwd" && exit 1
+fi
+sudo -K
+echo "$1" | sudo -S true &>/dev/null
+if [ ! $? ]; then
+    echo "wrong sudo passwd" && exit 1
+fi
+shift
+
+function run() {
+    echo -e "$CYAN $1 $RESET" && $1
+}
+
+function sudo_run() {
+    echo -e "$RED sudo$CYAN $1 $RESET" && sudo $1
+}
+
+function synk() {
+    [ -f ~/.unison/asynk.prf ] && echo -e "$RED ** unison asynk $RESET" && unison asynk.prf
+}
+
+function git_pull() {
+    pushd "$1" >/dev/null || return
+    echo -e "$CYAN$1$RESET"
+    run "git pull --rebase" || echo -e "$RED FAILED in : $(pwd) $RESET"
+    popd > /dev/null || exit 1
+}
+
+function update_pkgs() {
+    sudo_run "pacman -Scc --noconfirm"
+    sudo_run "pacman -Syu" || return
+    sudo_run "rm /var/cache/pacman/pkg/*"
+    run "yay -Sc --noconfirm"
+    run "yay -Syu"
+}
+
+function update_gem() {
+    # sudo_run "rm -fr /usr/lib/ruby/gems/*"
+    run "/usr/bin/gem update --no-document"
+    run "/usr/bin/gem clean"
+    # shellcheck disable=SC2046
+    if [ -r ~/.work ] && [ $(find "$GEM_HOME/cache" -name \*.gem 2>/dev/null | wc -l) -gt 0 ]
+    then
+      echo "OK"
+      find "$GEM_HOME/cache" -name \*.gem | while read -r gem; do gem inabox "$gem" ; done
+    fi
+    rm $GEM_HOME/cache/*.gem 2>/dev/null
+}
+
+function check_etc() {
+    sudo_run "find /etc -name *.pacnew"
+    [ -e /etc/.git ] || return
+    run "cd /etc"
+    sudo_run "git status"
+}
+
+function info() {
+    echo
+    uname -a
+    # dmesg --level=err,warn -T
+    echo
+}
+
+synk
+git_pull ~/usr/dotfiles
+update_pkgs
+update_gem
+check_etc
+info
+
+sudo -K

@@ -1,0 +1,77 @@
+# archive
+# for I in admin asynk corina dvg efl family friends hydrogen inaxis zedem; do
+#   archivemail -n -D `date +%Y`-01-01 --preserve-unread --no-compress --suffix=-$((`date +%Y` - 1)) -o ~/usr/private/mail/archives/ ~/usr/private/mail/$I
+# done
+
+# external files
+source dracula.muttrc
+source color.muttrc
+source aliases.muttrc
+source options.muttrc
+source scores.muttrc
+source sidebar.muttrc
+source keys.muttrc
+source gpg.muttrc
+
+set folder="~/usr/private/mail"
+set spoolfile="~/usr/private/mail/inbox"
+set mbox_type=Maildir
+mailboxes `find ~/usr/private/mail/ -type d -name cur -printf '%h '`
+set markers=no
+set reverse_alias=yes
+
+# FETCH
+macro index F "!fdm fetch\n !notmuch new >/dev/null 2>/dev/null\n" "fetch emails"
+macro pager F "!fdm fetch\n !notmuch new >/dev/null 2>/dev/null\n" "fetch emails"
+set sleep_time = 0
+set folder_format="%2C %t %N %u %2l %d %f"
+set date_format= "%A %d %B %Y  %H:%M"
+set index_format="%4C %2N %Z %-12.12B %{%b %d}  %-20.20n  (%2M) %s %> "
+unset sig_dashes
+set signature="~/.mutt/sign_asynk"
+
+# SEND
+set sendmail="/usr/bin/msmtp "
+set realname="Jérémy Zurcher"
+set hostname="asynk.ch"
+set use_from=yes
+set envelope_from=yes
+set from="jeremy@asynk.ch"
+
+# SET FROM
+#macro generic "<esc>1" ":set from=jeremy@asynk.ch; set signature=~/.mutt/sign_asynk"
+#macro generic "<esc>2" ":set from=tzurtch@lausanne-hardcore.ch; set signature=~/.mutt/sign_loz"
+#macro generic "<esc>3" ":set from=jeremy@kandyss.com; set signature=~/.mutt/sign_tz"
+#macro generic "<esc>4" ":set from=tzurtch@tzurtch.pas.nu; set signature=~/.mutt/sign_tz"
+
+folder-hook .       set from=jeremy@asynk.ch                signature="~/.mutt/sign_normal"
+folder-hook family  set from=jeremy@asynk.ch                signature="~/.mutt/sign_asynk"
+folder-hook admin   set from=jeremy_admin@asynk.ch          signature="~/.mutt/sign_normal"
+folder-hook job     set from=jeremy@asynk.ch                signature="~/.mutt/sign_asynk"
+folder-hook asynk   set from=jeremy@asynk.ch                signature="~/.mutt/sign_asynk"
+folder-hook ruby    set from=jeremy@asynk.ch                signature="~/.mutt/sign_asynk"
+
+folder-hook festymalt set from=benevoles@festymalt.ch
+folder-hook efl     set from=jeremy@asynk.ch                signature="~/.mutt/sign_short"
+folder-hook rustanddust set from=dev@rustanddust.ch         signature="~/.mutt/sign_rust"
+
+# SEARCH
+macro index <F8> \
+"<enter-command>set my_old_pipe_decode=\$pipe_decode my_old_wait_key=\$wait_key nopipe_decode nowait_key<enter>\
+<shell-escape>notmuch-mutt -r --prompt search<enter>\
+<change-folder-readonly>`echo ${XDG_CACHE_HOME:-$HOME/.cache}/notmuch/mutt/results`<enter>\
+<enter-command>set pipe_decode=\$my_old_pipe_decode wait_key=\$my_old_wait_key<enter>" \
+"notmuch: search mail"
+
+macro index <F9> \
+"<enter-command>set my_old_pipe_decode=\$pipe_decode my_old_wait_key=\$wait_key nopipe_decode nowait_key<enter>\
+<pipe-message>notmuch-mutt -r thread<enter>\
+<change-folder-readonly>`echo ${XDG_CACHE_HOME:-$HOME/.cache}/notmuch/mutt/results`<enter>\
+<enter-command>set pipe_decode=\$my_old_pipe_decode wait_key=\$my_old_wait_key<enter>" \
+"notmuch: reconstruct thread"
+
+macro index <F6> \
+"<enter-command>set my_old_pipe_decode=\$pipe_decode my_old_wait_key=\$wait_key nopipe_decode nowait_key<enter>\
+<pipe-message>notmuch-mutt tag -- -inbox<enter>\
+<enter-command>set pipe_decode=\$my_old_pipe_decode wait_key=\$my_old_wait_key<enter>" \
+"notmuch: remove message from inbox"

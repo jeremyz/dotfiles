@@ -1,0 +1,65 @@
+#! /usr/bin/env bash
+
+B=$(readlink -f "$0")
+export P=${B%/*}
+
+if [ ! -r /bin/links-fcts ]
+then
+  ln -s "$P/bash/links-fcts" ~/bin/links-fcts
+fi
+
+source "$HOME/bin/links-fcts" || exit 1
+
+echo " *** install :"
+link "bash/bashrc"               ".bashrc"
+link "bash/bash_logout"          ".bash_logout"
+link "bash/bash_profile"         ".bash_profile"
+link "bash/dircolors-dark"       ".dir_colors"
+link "bash/xinitrc"              ".xinitrc"
+link "bash/Xresources"           ".Xresources"
+
+link "unison/asynk.prf"          ".unison/asynk.prf"
+link "taskrc"                    ".config/task/taskrc"
+
+link "nvim/lua"                  ".config/nvim/lua"
+link "nvim/init.lua"             ".config/nvim/init.lua"
+
+link "tmux/tmux.conf"            ".config/tmux/tmux.conf"
+link "tmux/sessions"             ".config/tmux/sessions"
+
+link "ruby/gemrc"                ".gemrc"
+link "ruby/rubocop"              ".config/rubocop"
+link "git"                       ".config/git"
+
+link "mail/fdm.conf"             ".fdm.conf"
+link "mail/msmtprc"              ".config/msmtp/config"
+link "mail/mailcap"              ".mailcap"
+link "mail/mutt"                 ".config/mutt"
+link "mail/notmuch-config"       ".notmuch-config"
+
+link "redshift.conf"             ".config/redshift.conf"
+
+link "xdg/user-dirs.dirs"        ".config/user-dirs.dirs"
+link "xdg/mimeapps.list"         ".config/mimeapps.list"
+# link "mimeapps.list"             ".local/share/applications/mimeapps.list"
+
+link "newsboat/config"           ".config/newsboat/config"
+link "newsboat/urls"             ".config/newsboat/urls"
+
+link "godot/script_templates"    ".config/godot/script_templates"
+link "godot/editor_settings-4.tres" ".config/godot/editor_settings-4.tres"
+
+link "mpv.conf"                  ".config/mpv/mpv.conf"
+
+link "bash/cl" "bin/cl"
+link "bash/colors"               "bin/colors"
+link "bash/crtfetch"             "bin/crtfetch"
+link "bash/links"                "bin/links"
+link "bash/links-fcts"           "bin/links-fcts"
+link "bash/shck"                 "bin/shck"
+link "bash/update"               "bin/update"
+link "godot/update"              "bin/godot-update"
+link "efl/update"                "bin/efl-update"
+link "efl/efl-build-fcts"        "bin/efl-build-fcts"
+link "git/each_repo"             "bin/each_repo"
+link "git/gc"                    "bin/git_gc"

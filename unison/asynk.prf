@@ -1,0 +1,25 @@
+# Unison preferences file
+
+diff = diff -y -W 100 --suppress-common-lines
+merge = Name *.html -> diff3 CURRENT1 CURRENTARCH CURRENT2 -m  > NEW
+
+log = false
+
+root=/home/jeyzu/
+root=ssh://jeyzu@erratic/_synk/
+
+ignore = Name *~
+ignore = Name */.godot/*
+
+path = _wip
+
+path = usr/share
+
+path = usr/data
+ignore = Name usr/data/googleearth/Cache
+ignore = Name usr/data/googleearth/Temp
+
+path = usr/private/admin
+
+path = usr/private/mail
+ignore = Path usr/private/mail/.notmuch

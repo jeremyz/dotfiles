@@ -1,0 +1,63 @@
+
+regex=on
+
+data.location=/home/jeyzu/usr/data/task/
+
+include /usr/share/doc/task/rc/dark-256.theme
+
+uda.taskwarrior-tui.keyconfig.up=s
+uda.taskwarrior-tui.keyconfig.down=t
+uda.taskwarrior-tui.keyconfig.page-up=S
+uda.taskwarrior-tui.keyconfig.page-down=T
+uda.taskwarrior-tui.keyconfig.start-stop=;
+uda.taskwarrior-tui.keyconfig.quick-tag=^
+
+color=on
+dateformat=D.M
+dateformat.annotation=D.M
+dateformat.report=D.M
+weekstart=monday
+
+# Priority
+uda.priority.type=string
+uda.priority.label=Priority
+uda.priority.values=H,M,L,
+color.uda.priority.H=color255
+color.uda.priority.L=color245
+color.uda.priority.M=color250
+urgency.uda.priority.H.coefficient=6.0
+urgency.uda.priority.L.coefficient=1.8
+urgency.uda.priority.M.coefficient=3.9
+
+# Effort
+uda.effort.type=string
+uda.effort.label=Effort
+uda.effort.values=s,m,l,xl,xxl
+urgency.uda.effort.s.coefficient=1.5
+urgency.uda.effort.m.coefficient=1.1
+urgency.uda.effort.l.coefficient=1
+urgency.uda.effort.xl.coefficient=0
+urgency.uda.effort.xxl.coefficient=-0.2
+color.uda.effort.s=color180
+color.uda.effort.m=color210
+color.uda.effort.l=color255
+color.uda.effort.xl=color255
+color.uda.effort.xxl=color255
+
+# Project color
+color.project.QDot=black on blue
+
+# Report now
+news.version=2.6.0
+report.now.description=10 following tasks
+report.now.labels=ID,Active,Age,Deps,P,Effort,Project,Tag,Recur,S,Due,Until,Description,Urg
+report.now.columns=id,start.age,entry.age,depends,priority,effort,project,tags,recur,scheduled.countdown,due.relative,until.remaining,description,urgency
+report.now.filter=status:pending limit:10
+report.now.sort=due+,priority-
+
+context.hmsa.read=+hmsa
+context.hmsa.write=+hmsa
+context.asynk.read=+asynk
+context.asynk.write=+asynk
+context.home.read=+home
+context.home.write=+home

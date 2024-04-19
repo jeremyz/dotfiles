@@ -1,0 +1,45 @@
+[core]
+	excludesfile = /home/jeyzu/etc/git/ignore
+	logallrefupdates = true
+	pager = /usr/share/git/diff-highlight/diff-highlight | less --tabs=4 -RFX
+	editor = nvim
+[color]
+	ui = auto
+	status = auto
+	branch = auto
+	diff = auto
+[color "branch"]
+	current = cyan reverse
+	local = yellow
+	remote = magenta
+[color "diff"]
+	meta = yellow bold
+	frag = magenta bold
+	old = red bold
+	new = green bold
+[color "status"]
+	added = green
+	changed = yellow
+	untracked = cyan
+[format]
+	pretty = "%C(cyan)%h %Creset%ci %C(yellow)<%ae> %C(white)%s %C(magenta)%d%Creset"
+[push]
+	default = current
+[alias]
+	co = checkout
+	lg = log --graph --all HEAD~20..
+	lx = log --graph --decorate --pretty=oneline --abbrev-commit --all HEAD~20..
+	cw = !git diff-tree --check $(git hash-object -t tree /dev/null) HEAD
+[branch]
+	autosetuprebase = always
+[diff]
+	tool = vimdiff
+	renameLimit = 999666
+[merge]
+	tool = vimdiff
+[pull]
+	rebase = true
+[user]
+	name = Jérémy Zurcher
+[credential]
+	helper = store

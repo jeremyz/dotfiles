@@ -1,0 +1,85 @@
+#! /usr/bin/env bash
+
+RESET="\033[0m"
+RED="\033[0;31m"
+
+function fail()
+{
+  echo -e "$RED@@@ $RESET$1" && exit 1
+}
+
+function say()
+{
+  echo -e "$RED:: $RESET$1"
+}
+
+if [ $UID -ne 0 ]
+then
+  fail "must be run as root"
+fi
+
+if [ $# -ne 1 ]
+then
+  fail "missing user"
+fi
+
+USR=$1
+USRH=/home/$USR
+
+if [ ! -d "$USRH" ]
+then
+  fail "$USRH is not avalid user directory"
+fi
+
+ELIST=arch-bkp-files-etc
+HLIST=arch-bkp-files-home
+
+if [ ! -r "$ELIST" ]
+then
+  fail "missing file : $ELIST"
+fi
+
+if [ ! -r "$HLIST" ]
+then
+  fail "missing file : $HLIST"
+fi
+
+PKGS=/tmp/$(hostname)-packages
+GEMS=/tmp/$(hostname)-gems
+SRVS=/tmp/$(hostname)-services
+LIST=/tmp/$(hostname)-list
+TGZ=$USRH/$(hostname)-archive.tgz
+
+function cl() {
+  [ -e "$PKGS" ] && rm "$PKGS"
+  [ -e "$GEMS" ] && rm "$GEMS"
+  [ -e "$SRVS" ] && rm "$SRVS"
+  [ -e "$LIST" ] && rm "$LIST"
+}
+
+cl
+say "generate package list $PKGS ..."
+pacman -Q > "$PKGS"
+say "generate gem list $GEMS ..."
+gem env > "$GEMS"
+say "generate services list $SRVS ..."
+systemctl --type=service --state=active | grep service > "$SRVS"
+
+
+say "archive etc ..."
+{
+  cat $ELIST | while read -r name; do test -r "$name" && echo "$name"; done
+  find /etc/systemd/system/ -type f
+  find /etc/systemd/network/ -type f
+  find /etc/systemd/user/ -type f
+  cat $HLIST | while read -r name; do test -r "$USRH/$name" && echo "$USRH/$name"; done
+  echo "$PKGS"
+  echo "$GEMS"
+  echo "$SRVS"
+} > "$LIST"
+sed -i 's#^/##' "$LIST"
+say "generate $TGZ"
+tar -czpf "$TGZ" -C / -T "$LIST" || fail "tar failure" # -h to follow symlinks
+chown "$USR" "$TGZ"
+cl
+say "hardcore restore : sudo tar --same-owner -xzf $(basename "$TGZ") -C /"

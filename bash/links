@@ -1,0 +1,26 @@
+#! /usr/bin/env bash
+
+source "$HOME/bin/links-fcts" || exit 1
+
+declare -A LNK_PATTERNS
+LNK_PATTERNS[dotfiles]="$RED"
+LNK_PATTERNS[data]="$PURPLE"
+export LNK_PATTERNS
+
+echo -e " *** ${BROWN}~$RESET :"
+find ~/  -maxdepth 2 -type l ! -path "$HOME/bin/*" ! -path "$HOME/.config/*" | sort | while read -r link
+do
+  show "$link"
+done
+echo -e " *** ${BROWN}~/.config$RESET :"
+find ~/.config/  -maxdepth 2 -type l | sort | while read -r link
+do
+  show "$link" ".config"
+done
+echo -e " *** ${BROWN}~/.local$RESET :"
+find ~/.local/ -maxdepth 3 -type l | sort | while read -r link
+do
+  show "$link" ".local"
+done
+echo -e " *** ${RED}dead$RESET :"
+find ~ -maxdepth 3 -xtype l

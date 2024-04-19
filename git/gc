@@ -1,0 +1,15 @@
+#! /usr/bin/env bash
+
+if [ $# -ne 1 ]
+then
+  echo "missing name of ts file" && exit 1
+fi
+[ ! -d "$HOME/state" ] && mkdir "$HOME/state"
+FILE="$HOME/state/$1"
+[ -r "$FILE" ] || touch "$FILE"
+A=$(stat -c %X "$FILE")
+C=$(date +%s)
+D=$(( (C - A) / (60*60*24) ))
+echo "last GC : $D"
+[ $D -gt 15 ] && cd godot-master && git gc --aggressive && cd .. && rm "$FILE" && touch "$FILE"
+date > "$FILE"
