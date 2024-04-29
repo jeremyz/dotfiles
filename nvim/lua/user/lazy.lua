@@ -60,7 +60,7 @@ require("lazy").setup {
   { 'habamax/vim-godot', event = 'VimEnter' },
   -- TELESCOPE
   {
-    'nvim-telescope/telescope.nvim',
+    'nvim-telescope/telescope.nvim', -- needs ripgrep
     branch = '0.1.x',
     requires = { {'nvim-lua/plenary.nvim'} },
   },
