@@ -18,6 +18,10 @@ vim.keymap.set("n", "<C-Right>", ":vertical resize -2<CR>")
 -- lsp
 vim.keymap.set('n', ',,', ':pop<CR>')
 
+-- quickfix list
+vim.keymap.set("n", "<A-t>", ":cn<CR>")
+vim.keymap.set("n", "<A-s>", ":cp<CR>")
+
 -- search
 -- vim.keymap.set('n', 'nN', ':nohl<CR>')
 
