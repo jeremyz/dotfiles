@@ -101,3 +101,5 @@ then
         eval "$(<~/.ssh/agent)" >/dev/null
     fi
 fi
+
+[ -r "$HOME/.bash_local" ] && "$HOME/.bash_local"
