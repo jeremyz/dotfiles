@@ -17,6 +17,11 @@ require('telescope').setup {
       }
     },
   },
+  pickers = {
+    find_files = {
+      follow = true
+    }
+  },
   highlights = {
     TelescopeBorder = {
       guifg = '#FF0000',  -- Border color (example: red)
