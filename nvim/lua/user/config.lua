@@ -220,6 +220,13 @@ cmp.setup {
   },
 }
 
+cmp.setup.filetype({'sql'}, {
+  sources = {
+    { name = "vim-dadbod-completion" },
+    { name = "buffer" },
+  },
+})
+
 -- DAP
 local dap = require 'dap'
 local dapui = require 'dapui'

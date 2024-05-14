@@ -97,4 +97,8 @@ require("lazy").setup {
       'jay-babu/mason-nvim-dap.nvim',
     },
   },
+  -- SQL
+  'tpope/vim-dadbod',
+  'kristijanhusak/vim-dadbod-ui',
+  'kristijanhusak/vim-dadbod-completion'
 }
