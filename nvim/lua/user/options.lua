@@ -56,8 +56,8 @@ vim.opt.listchars = {
   trail = '·',
   extends = '→',
   precedes = '←',
-  nbsp = '␣'
-  --eol = '⤶',
+  nbsp = '␣',
+  eol = '⤶',
 }
 
 --bool Object::_predelete() {
