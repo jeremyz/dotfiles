@@ -64,7 +64,6 @@ fi
 
 function build()
 {
-  #[ -f custom.py ] && rm custom.py
   rm ./bin/*
   [ $CLEAN -eq 1 ] && scons --clean
 
@@ -75,7 +74,6 @@ function build()
 
   if [ $ANDROID -eq 1 ]
   then
-    #[ -f ../custom.py ] && cp ../custom.py .
     [ ! -d "$TEMPLATE_DIR" ] && mkdir "$TEMPLATE_DIR"
 
     # https://docs.huihoo.com/godotengine/godot-docs/godot/reference/compiling_for_android.html
@@ -101,7 +99,6 @@ function build()
     popd || exit 1
 
     cp bin/android* "$TEMPLATE_DIR/"
-    rm custom.py
   fi
 }
 
@@ -129,6 +126,3 @@ fi
 strip ./bin/godot.*
 ls -lh ./bin/
 git_gc _godot_build
-
-# scons -j4 platform=linuxbsd target=release_debug tools=yes pulseaudio=no bits=64 warnings=no #custom_modules=../modules
-# scons -j4 platform=android target=debug android_arch=arm64v8 tools=no disable_3d=true
