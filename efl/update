@@ -48,7 +48,6 @@ function build_all()
   for cfg in "${cfgs[@]}"
   do
     build_cfg "$cfg"
-    git_gc "_efl_$(echo "${build_cfgs["$cfg",0]}" | tr '/' '_')"
   done
 }
 

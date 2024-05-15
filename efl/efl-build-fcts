@@ -170,7 +170,7 @@ function build()
       echo "$SUDO_PASSWD" | sudo -S ldconfig
       [ "$use_build_dir" -eq 1 ] && popd
    fi
-
+   git_gc "_efl_$(echo "${src_dir}" | tr '/' '_')"
    popd
 }
 
