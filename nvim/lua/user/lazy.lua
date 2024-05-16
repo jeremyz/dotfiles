@@ -34,7 +34,7 @@ require("lazy").setup {
     },
   },
   {
-    "cbochs/grapple.nvim",
+    "cbochs/grapple.nvim", -- ~/.local/share/nvim/grapple
     opts = { scope = "git", icons = true, status = true },
     keys = {
       { "<leader>p", "<cmd>Grapple toggle<cr>", desc = "Tag a file" },
@@ -99,6 +99,6 @@ require("lazy").setup {
   },
   -- SQL
   'tpope/vim-dadbod',
-  'kristijanhusak/vim-dadbod-ui',
+  'kristijanhusak/vim-dadbod-ui',   -- ~/.local/share/db_ui/connections.json
   'kristijanhusak/vim-dadbod-completion'
 }
