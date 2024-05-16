@@ -20,6 +20,7 @@ export GEM_HOME="${HOME}/.gem/ruby/3.0.0"
 export PATH=$PATH:$GEM_HOME/bin
 export MPD_HOST=fakenews
 export XDG_CONFIG_HOME="$HOME/.config"
+export ORACLE_PATH="$HOME/.config/oracle"
 
 # shellcheck source=/dev/null
 [ -r "$HOME/.config/local/bash.sh" ] && source "$HOME/.config/local/bash.sh"

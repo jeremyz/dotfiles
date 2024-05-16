@@ -49,6 +49,8 @@ link "godot/editor_settings-4.tres" ".config/godot/editor_settings-4.tres"
 
 link "mpv.conf"                  ".config/mpv/mpv.conf"
 
+link "oracle/login.sql"          ".config/oracle/login.sql"
+
 link "bash/cl" "bin/cl"
 link "bash/colors"               "bin/colors"
 link "bash/crtfetch"             "bin/crtfetch"
