@@ -80,7 +80,7 @@ function build()
     [ $CLEAN -eq 1 ] && (pushd platform/android/java && echo -e "${RED}gradlew clean$RESET" && ./gradlew --no-daemon cleanGodotTemplates && popd || exit 1)
     for target in $targets;
     do
-      for arch in arm64v8 armv7; #x86_6
+      for arch in arm64v8;# armv7;# x86_6
       do
         if [ $VERSION == 3 ]
         then
