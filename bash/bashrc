@@ -26,6 +26,7 @@ export ORACLE_PATH="$HOME/.config/oracle"
 [ -r "$HOME/.config/local/bash.sh" ] && source "$HOME/.config/local/bash.sh"
 
 # ZOXIDE
+export _ZO_ECHO=1
 eval "$(zoxide init --cmd cd bash)"
 
 # LS COLORS
