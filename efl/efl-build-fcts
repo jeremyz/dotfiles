@@ -189,7 +189,7 @@ function do_meson()
    [ $CLEAN_LEVEL -ge 4 ] && [ -d "$BUILD_DIR" ] && exec_cmd "rm -fr $BUILD_DIR" 2>/dev/null
    if [ ! -f "$mesontoken" ]
    then
-      exec_cmd "meson --prefix=${PREFIX} $1 $BUILD_DIR" || fatal "meson"
+      exec_cmd "meson setup --prefix=${PREFIX} $1 $BUILD_DIR" || fatal "meson"
    else
       [ $CLEAN_LEVEL -ge 3 ] && ( exec_cmd "meson configure --clearcache $BUILD_DIR" || fatal "meson configure" )
    fi

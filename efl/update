@@ -7,7 +7,7 @@ export LOCAL_CONF=$DIR/efl-build.conf
 source "$HOME/bin/efl-build-fcts"
 [ -r $LOCAL_CONF ] && source $LOCAL_CONF
 
-declare -a cfgs=(efl e terminology evisum rage ephoto)
+declare -a cfgs=(efl e terminology enigmatic evisum rage ephoto)
 declare -A build_cfgs=(
 ["efl",0]="core/efl"
 ["efl",1]="-Defl-one=true -Doptimization=2 -Dharfbuzz=true -Dbuild-examples=false -Dbuild-tests=false -Ddrm=true -Dwl=true -Dbindings="
@@ -19,6 +19,8 @@ declare -A build_cfgs=(
 ["terminology",2]="USE_MESON"
 ["evisum",0]="apps/evisum"
 ["evisum",2]="USE_MESON"
+["enigmatic",0]="netstar/enigmatic"
+["enigmatic",2]="USE_MESON"
 ["rage",0]="apps/rage"
 ["rage",2]="USE_MESON"
 ["ephoto",0]="apps/ephoto"
