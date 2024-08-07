@@ -16,6 +16,8 @@ link "bash/dircolors-dark"       ".dir_colors"
 link "bash/xinitrc"              ".xinitrc"
 link "bash/Xresources"           ".Xresources"
 
+link "pipewire/10-disable-camera.conf"            ".config/wireplumber/wireplumber.conf.d/10-disable-camera.conf"
+
 link "unison/asynk.prf"          ".unison/asynk.prf"
 link "taskrc"                    ".config/task/taskrc"
 
