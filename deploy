@@ -27,9 +27,10 @@ link "nvim/init.lua"             ".config/nvim/init.lua"
 link "tmux/tmux.conf"            ".config/tmux/tmux.conf"
 link "tmux/sessions"             ".config/tmux/sessions"
 
+link "git"                       ".config/git"
+link "ccache.conf"               ".config/ccache/ccache.conf"
 link "ruby/gemrc"                ".gemrc"
 link "ruby/rubocop"              ".config/rubocop"
-link "git"                       ".config/git"
 
 link "mail/fdm.conf"             ".fdm.conf"
 link "mail/msmtprc"              ".config/msmtp/config"
