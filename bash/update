@@ -46,6 +46,7 @@ function update_pkgs() {
 
 function update_gem() {
     # sudo_run "rm -fr /usr/lib/ruby/gems/*"
+    # for I in ~/.gem/ruby/3.0.0/gems/*; do pkg=${I##*/}; gem install ${pkg%-*}; done
     run "/usr/bin/gem update --no-document"
     run "/usr/bin/gem clean"
     # shellcheck disable=SC2046
