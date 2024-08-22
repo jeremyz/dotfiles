@@ -1,10 +1,10 @@
 #! /usr/bin/env bash
 
-B=$(readlink -f "$0")
+B=$(realpath "$0")
 export P=${B%/*}
 
-[ ! -r /bin/colors ] && ln -s "$P/bash/colors" ~/bin/colors
-[ ! -r /bin/links-fcts ] && ln -s "$P/bash/links-fcts" ~/bin/links-fcts
+[ ! -r $HOME/bin/colors ] && ln -s "$P/bash/colors" ~/bin/colors
+[ ! -r $HOME/bin/links-fcts ] && ln -s "$P/bash/links-fcts" ~/bin/links-fcts
 
 source "$HOME/bin/links-fcts" || exit 1
 

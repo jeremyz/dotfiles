@@ -29,7 +29,7 @@ function formatls() {
 
 function show() {
   lnks=$(formatls "$1" "$2")
-  lnk=$(readlink "$1")
+  lnk=$(realpath "$1")
   lnkf=$(formatld "$lnk")
   if [[ -r $lnk ]]
   then
@@ -40,12 +40,12 @@ function show() {
 }
 
 function good() {
-  lnk=$(readlink "$1")
+  lnk=$(realpath "$1")
   printf "$GREEN%40s $GRAY ->  $BROWN%s$RESET\n" "${1//$HOME\/}" "${lnk//$HOME\/}"
 }
 
 function bad() {
-  lnk=$(readlink "$1")
+  lnk=$(realpath "$1")
   printf "$RED%40s $GRAY ->  $BROWN%s$RESET\n" "${1//$HOME\/}" "${lnk//$HOME\/}"
 }
 
@@ -56,7 +56,7 @@ function link() {
   lnk="$HOME/$2"
   if [ -f "$lnk" ] || [ -d "$lnk" ]
   then
-    rlnk=$(readlink "$lnk")
+    rlnk=$(realpath "$lnk")
     if [ "$rlnk" = "$target" ]
     then
       good "$lnk"
