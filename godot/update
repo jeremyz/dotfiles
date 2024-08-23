@@ -31,8 +31,7 @@ targets="template_release template_debug"
 common_flags="use_llvm=yes linker=lld debug_symbols=no lto=none use_static_cpp=no" # arch does not provide libatomic.a through gcc-libs
 linux_flags="tools=yes colored=yes pulseaudio=no bits=64 warnings=no" #custom_modules=../modules
 
-#export CXX=/usr/lib/ccache/bin/clang++
-#export CC=/usr/lib/ccache/bin/clang
+CXX="ccache clang++"
 #export ANDROID_HOME=/opt/android-sdk
 #export ANDROID_NDK_ROOT=/opt/android-ndk
 
@@ -70,7 +69,7 @@ function build()
   # https://docs.huihoo.com/godotengine/godot-docs/godot/reference/compiling_for_x11.html
   echo -e "build : ${RED}$platform$RESET target=$RED$target$RESET"
   # shellcheck disable=SC2086
-  time scons platform=$platform target=$target $linux_flags $common_flags #warnings=no #custom_modules=../modules
+  time scons CXX="$CXX" platform=$platform target=$target $linux_flags $common_flags #warnings=no #custom_modules=../modules
 
   if [ $ANDROID -eq 1 ]
   then
