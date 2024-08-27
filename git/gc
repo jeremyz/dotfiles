@@ -11,5 +11,5 @@ A=$(stat -c %X "$FILE")
 C=$(date +%s)
 D=$(( (C - A) / (60*60*24) ))
 echo "last GC : $D"
-[ $D -gt 15 ] && git gc --aggressive && rm "$FILE" && touch "$FILE"
+[ $D -gt 15 ] && git gc && rm "$FILE" && touch "$FILE"
 date > "$FILE"
