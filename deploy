@@ -48,6 +48,7 @@ link "newsboat/config"           ".config/newsboat/config"
 link "newsboat/urls"             ".config/newsboat/urls"
 
 link "godot/script_templates"    ".config/godot/script_templates"
+link "godot/text_editor_themes"  ".config/godot/text_editor_themes"
 link "godot/editor_settings-4.tres" ".config/godot/editor_settings-4.tres"
 
 link "mpv.conf"                  ".config/mpv/mpv.conf"
