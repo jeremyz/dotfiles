@@ -44,6 +44,11 @@ color.uda.effort.l=color255
 color.uda.effort.xl=color255
 color.uda.effort.xxl=color255
 
+# Completion
+uda.completion.type=numeric
+uda.completion.label=Completion
+uda.completion.default=0
+
 # Project color
 color.project.QDot=black on blue
 
