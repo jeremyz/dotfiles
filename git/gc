@@ -4,8 +4,9 @@ if [ $# -ne 1 ]
 then
   echo "missing name of ts file" && exit 1
 fi
-[ ! -d "$HOME/state" ] && mkdir "$HOME/state"
-FILE="$HOME/state/$1"
+DST="$HOME/.cache/gstate"
+[ ! -d "$DST" ] && mkdir "$DST"
+FILE="$DST/$1"
 [ -r "$FILE" ] || touch "$FILE"
 A=$(stat -c %X "$FILE")
 C=$(date +%s)
