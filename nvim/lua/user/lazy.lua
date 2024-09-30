@@ -18,7 +18,7 @@ require("lazy").setup {
   'morhetz/gruvbox',
   'jamessan/vim-gnupg',
   'folke/todo-comments.nvim',
-  -- 'tpope/vim-fugitive',
+  'tpope/vim-fugitive',
   'embear/vim-localvimrc',
   'stevearc/oil.nvim',
   {
