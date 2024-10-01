@@ -23,7 +23,8 @@ function ApplyColorscheme(scheme)
   hl(0, 'LspReferenceText', { bg='#606060' })
   hl(0, 'LspReferenceRead', { bg='#606000' })
   hl(0, 'LspReferenceWrite', { bg='#066000' })
-
+  hl(0, "WinSeparator", { fg = "#008f11", bg = "None" })
+  hl(0, "StatusLine", { fg = "#008f11", bg = "#000000" })
 end
 
 --ApplyColorscheme('gruvbox')

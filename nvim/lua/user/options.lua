@@ -46,7 +46,7 @@ vim.opt.timeoutlen = 400                        -- time to wait for a mapped seq
 vim.opt.scrolloff = 8                           -- # lines above under the cursor
 vim.opt.sidescrolloff = 8
 vim.opt.ruler = true
-vim.opt.laststatus = 2
+vim.opt.laststatus = 3
 
 vim.opt.shortmess:append "c"
 
