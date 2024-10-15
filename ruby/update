@@ -14,8 +14,11 @@ do
     SPEC=${SPEC%.gemspec}
     SPEC=${SPEC##*/}
     SPEC=${SPEC%-*};
-    H=$(find $DST/specifications -name "$SPEC"\* | head -n 1)
+    H=$(find "$DST"/specifications -name "$SPEC"\* | head -n 1)
     [ -n "$H" ] && continue
     echo " *** install $SPEC"
-    gem install --install-dir $DST --no-document "$SPEC"
+    gem install --install-dir "$DST" --no-document "$SPEC"
 done
+
+gem update
+gem generate_index
