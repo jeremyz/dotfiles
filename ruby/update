@@ -1,0 +1,21 @@
+#! /bin/bash
+
+if [ $# -lt 2 ]
+then
+  echo "missing argument : <version> <version>"
+  exit 1
+fi
+
+SRC="/home/jeyzu/.gem/ruby/$1"
+DST="/home/jeyzu/.gem/ruby/$2"
+
+for SPEC in "$SRC"/specifications/*;
+do
+    SPEC=${SPEC%.gemspec}
+    SPEC=${SPEC##*/}
+    SPEC=${SPEC%-*};
+    H=$(find $DST/specifications -name "$SPEC"\* | head -n 1)
+    [ -n "$H" ] && continue
+    echo " *** install $SPEC"
+    gem install --install-dir $DST --no-document "$SPEC"
+done
