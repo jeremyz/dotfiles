@@ -22,7 +22,7 @@ export MPD_HOST=fakenews
 export XDG_CONFIG_HOME="$HOME/.config"
 export ORACLE_PATH="$HOME/.config/oracle"
 export GPG_TTY=$(tty) # pinentry
-export JDTLS_JVM_ARGS="$HOME/.local/share/nvim/mason/packages/jdtls/lombok.jar"
+export JDTLS_JVM_ARGS="-javaagent:$HOME/.local/share/nvim/mason/packages/jdtls/lombok.jar"
 
 # shellcheck source=/dev/null
 [ -r "$HOME/.config/local/bash.sh" ] && source "$HOME/.config/local/bash.sh"
