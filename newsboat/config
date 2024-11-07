@@ -58,7 +58,7 @@ color info color141 color236
 color background default default
 color listnormal color245 default
 color listnormal_unread color251 default
-color listfocus color238 color47 standout
+color listfocus color238 color30 standout
 color listfocus_unread color238 color47 standout
 
 # highlights
