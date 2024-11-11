@@ -26,6 +26,13 @@ require("lazy").setup {
     opts = {
       numhl = true,
       word_diff = false,
+      preview_config = {
+        border = 'rounded',
+      },
+      on_attach = function(bufnr)
+        local gitsigns = require('gitsigns')
+        vim.keymap.set('n', '<leader>hp', gitsigns.preview_hunk, {})
+      end
     },
   },
   {
