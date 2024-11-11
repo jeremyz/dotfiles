@@ -25,6 +25,7 @@ function ApplyColorscheme(scheme)
   hl(0, 'LspReferenceWrite', { bg='#066000' })
   hl(0, "WinSeparator", { fg = "#008f11", bg = "None" })
   hl(0, "StatusLine", { fg = "#008f11", bg = "#000000" })
+  hl(0, "GitSignsCurrentLineBlame", { fg = "#12a123", bg = "#000000" })
 end
 
 --ApplyColorscheme('gruvbox')
