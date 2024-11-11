@@ -134,6 +134,22 @@ servers_setup = {
       return vim.fs.dirname(vim.api.nvim_buf_get_name(0))
     end
   },
+  jdtls = {
+    settings = {
+      java = {
+        format = {
+          enabled = true
+        }
+      }
+    },
+    on_attach = function(client, bufnr)
+      client.server_capabilities.semanticTokensProvider = nil
+      vim.bo[bufnr].shiftwidth = 4
+      vim.bo[bufnr].tabstop = 4
+      vim.bo[bufnr].softtabstop = 4
+      vim.bo[bufnr].expandtab = true
+    end
+  }
 }
 require('mason').setup({})
 require('mason-lspconfig').setup({
