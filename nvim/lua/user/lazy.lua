@@ -30,7 +30,6 @@ require("lazy").setup {
         border = 'rounded',
       },
       current_line_blame_formatter = '    <author>, <author_time:%R> - <summary>',
-      current_line_blame_highlight = 'GitSignsCurrentLineBlame',
       on_attach = function(bufnr)
         local gitsigns = require('gitsigns')
         vim.keymap.set('n', '<leader>gp', gitsigns.preview_hunk, {})
