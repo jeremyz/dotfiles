@@ -12,7 +12,10 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- https://github.com/nvim-lua/kickstart.nvim/blob/master/init.lua
-require("lazy").setup {
+require("lazy").setup({
+  ui = {
+    border = "rounded",
+  },
   'nvim-lua/plenary.nvim',
   'lunarvim/darkplus.nvim',
   'morhetz/gruvbox',
@@ -105,4 +108,4 @@ require("lazy").setup {
   'tpope/vim-dadbod',
   'kristijanhusak/vim-dadbod-ui',   -- ~/.local/share/db_ui/connections.json
   'kristijanhusak/vim-dadbod-completion'
-}
+})
