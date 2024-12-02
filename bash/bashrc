@@ -107,4 +107,4 @@ then
     fi
 fi
 
-[ -r "$HOME/.bash_local" ] && "$HOME/.bash_local"
+[ -r "$HOME/.bash_local" ] && source "$HOME/.bash_local"
