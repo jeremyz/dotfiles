@@ -53,7 +53,7 @@ uda.completion.default=0
 color.project.QDot=black on blue
 
 # Report now
-news.version=2.6.0
+news.version=3.2.0
 report.now.description=10 following tasks
 report.now.labels=ID,Active,Age,Deps,P,Effort,Project,Tag,Recur,S,Due,Until,Description,Urg
 report.now.columns=id,start.age,entry.age,depends,priority,effort,project,tags,recur,scheduled.countdown,due.relative,until.remaining,description,urgency
