@@ -5,6 +5,8 @@ data.location=/home/jeyzu/usr/data/task/
 
 include /usr/share/doc/task/rc/dark-256.theme
 
+default.project=Inbox
+
 uda.taskwarrior-tui.keyconfig.up=s
 uda.taskwarrior-tui.keyconfig.down=t
 uda.taskwarrior-tui.keyconfig.page-up=S
@@ -50,7 +52,7 @@ uda.completion.label=Completion
 uda.completion.default=0
 
 # Project color
-color.project.QDot=black on blue
+color.project.admin=green
 
 # Report now
 news.version=3.2.0
