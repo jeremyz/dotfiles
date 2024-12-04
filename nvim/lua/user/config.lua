@@ -17,6 +17,8 @@ require('telescope').setup {
         ["<A-d>"] = actions.delete_buffer
       },
     },
+    path_display = { "shorten" },
+    dynamic_preview_title = true,
   },
   pickers = {
     find_files = {
