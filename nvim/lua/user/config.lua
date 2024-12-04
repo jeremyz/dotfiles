@@ -13,8 +13,9 @@ require('telescope').setup {
     mappings = {
       i = {
         ["<A-s>"] = actions.move_selection_previous,
-        ["<A-t>"] = actions.move_selection_next
-      }
+        ["<A-t>"] = actions.move_selection_next,
+        ["<A-d>"] = actions.delete_buffer
+      },
     },
   },
   pickers = {
