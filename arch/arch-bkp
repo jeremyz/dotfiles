@@ -61,7 +61,7 @@ cl
 say "generate package list $PKGS ..."
 pacman -Q > "$PKGS"
 say "generate gem list $GEMS ..."
-gem env > "$GEMS"
+gem list > "$GEMS"
 say "generate services list $SRVS ..."
 systemctl --type=service --state=active | grep service > "$SRVS"
 
