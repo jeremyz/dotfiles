@@ -1,0 +1,12 @@
+#! /usr/bin/env bash
+
+source "$HOME/bin/colors" || exit 1
+
+required_binaries=(git bat nvim rg neomutt fdm newsboat dbeaver pg_ctl sqlite3 mvn javac)
+
+for binary in "${required_binaries[@]}"; do
+  if ! which "$binary" &> /dev/null; then
+    echo -e "$RED[MISSING]$RESET $binary"
+    missing=true
+  fi
+done
