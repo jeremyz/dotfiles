@@ -16,7 +16,7 @@ function ApplyColorscheme(scheme)
   hl(0, 'NonText', { fg = '#4a4a59' })
   hl(0, 'netrwMarkFile', { bg = '#ede99d', fg = 'black' })
   vim.cmd[[match ExtraWhitespace /\s\+$/]]
-  hl(0, 'ExtraWhitespace', { bg = '#bb7a44', fg = 'black' })
+  hl(0, 'ExtraWhitespace', { bg = '#629640', fg = 'white' })
   hl(0, 'FloatBorder', { fg = 'red' })
   -- hl(0, 'NormalFloat', { bg='#334f17' })
   hl(0, 'TelescopeBorder', { fg='red' })
