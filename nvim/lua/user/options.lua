@@ -57,7 +57,8 @@ vim.opt.listchars = {
   extends = '→',
   precedes = '←',
   nbsp = '␣',
-  eol = '⤶',
+  eol = '↵',
+  --eol = '⤶',                                  -- needs noto-fonts-emoji
 }
 
 --bool Object::_predelete() {
