@@ -5,7 +5,7 @@ RED="\033[0;31m"
 
 function fail()
 {
-  echo -e "$RED@@@ $RESET$1" && exit 1
+  echo -e "$RED error$RESET: $1" && exit 1
 }
 
 function say()
@@ -13,46 +13,30 @@ function say()
   echo -e "$RED:: $RESET$1"
 }
 
-if [ $UID -ne 0 ]
-then
-  fail "must be run as root"
-fi
-
-if [ $# -ne 1 ]
-then
-  fail "missing user"
-fi
+[ $UID -ne 0 ] && fail "must be run as root"
+[ $# -ne 1 ] && fail "missing user"
 
 USR=$1
 USRH=/home/$USR
-
-if [ ! -d "$USRH" ]
-then
-  fail "$USRH is not avalid user directory"
-fi
-
+HOSTNAME=$(uname -n)
 ELIST=arch-bkp-files-etc
 HLIST=arch-bkp-files-home
 
-if [ ! -r "$ELIST" ]
-then
-  fail "missing file : $ELIST"
-fi
+[ -d "$USRH" ] || fail "$USRH is not avalid user directory"
+[ -r "$ELIST" ] || fail "missing file : $ELIST"
+[ -r "$HLIST" ] || fail "missing file : $HLIST"
 
-if [ ! -r "$HLIST" ]
-then
-  fail "missing file : $HLIST"
-fi
-
-PKGS=/tmp/$(hostname)-packages
-GEMS=/tmp/$(hostname)-gems
-SRVS=/tmp/$(hostname)-services
-LIST=/tmp/$(hostname)-list
-TGZ=$USRH/$(hostname)-archive.tgz
+PKGS=/tmp/${HOSTNAME}-packages
+GEMS=/tmp/${HOSTNAME}-gems
+HRDW=/tmp/${HOSTNAME}-hardware
+SRVS=/tmp/${HOSTNAME}-services
+LIST=/tmp/${HOSTNAME}-list
+TGZ=$USRH/${HOSTNAME}-archive.tgz
 
 function cl() {
   [ -e "$PKGS" ] && rm "$PKGS"
   [ -e "$GEMS" ] && rm "$GEMS"
+  [ -e "$HRDW" ] && rm "$HRDW"
   [ -e "$SRVS" ] && rm "$SRVS"
   [ -e "$LIST" ] && rm "$LIST"
 }
@@ -62,10 +46,11 @@ say "generate package list $PKGS ..."
 pacman -Q > "$PKGS"
 say "generate gem list $GEMS ..."
 gem list > "$GEMS"
+say "generate hardware list $HRDW ..."
+lspci -tv > "$HRDW"
+lsusb -t >> "$HRDW"
 say "generate services list $SRVS ..."
 systemctl --type=service --state=active | grep service > "$SRVS"
-
-
 say "archive etc ..."
 {
   cat $ELIST | while read -r name; do test -r "$name" && echo "$name"; done
@@ -75,6 +60,7 @@ say "archive etc ..."
   cat $HLIST | while read -r name; do test -r "$USRH/$name" && echo "$USRH/$name"; done
   echo "$PKGS"
   echo "$GEMS"
+  echo "$HRDW"
   echo "$SRVS"
 } > "$LIST"
 sed -i 's#^/##' "$LIST"
