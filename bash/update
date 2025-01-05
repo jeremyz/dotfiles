@@ -45,6 +45,10 @@ function update_pkgs() {
 }
 
 function update_gem() {
+    A=$(stat -c %X "$GEM_HOME/cache/when")
+    C=$(date +%s)
+    D=$(( (C - A) / (60*60*24) ))
+    [ $D -lt 5 ] && return
     # sudo_run "rm -fr /usr/lib/ruby/gems/*"
     # for I in ~/.gem/ruby/3.0.0/gems/*; do pkg=${I##*/}; gem install ${pkg%-*}; done
     run "/usr/bin/gem update --no-document"
@@ -56,6 +60,7 @@ function update_gem() {
       find "$GEM_HOME/cache" -name \*.gem | while read -r gem; do gem inabox "$gem" ; done
     fi
     rm $GEM_HOME/cache/*.gem 2>/dev/null
+    rm "$GEM_HOME/cache/when" && touch "$GEM_HOME/cache/when"
 }
 
 function check_etc() {
