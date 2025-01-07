@@ -59,8 +59,8 @@ function update_gem() {
       echo "OK"
       find "$GEM_HOME/cache" -name \*.gem | while read -r gem; do gem inabox "$gem" ; done
     fi
-    rm $GEM_HOME/cache/*.gem 2>/dev/null
-    rm "$GEM_HOME/cache/when" && touch "$GEM_HOME/cache/when"
+    rm $GEM_HOME/cache/* 2>/dev/null
+    touch "$GEM_HOME/cache/when"
 }
 
 function check_etc() {
