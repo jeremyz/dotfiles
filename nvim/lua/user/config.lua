@@ -205,7 +205,7 @@ cmp.setup {
     -- ["<A-Space>"] = cmp.mapping(cmp.mapping.complete(), { "i", "c" }),
     ["<Tab>"] = cmp.mapping(function(fallback)
       if cmp.visible() then
-        cmp.select_next_item()
+        cmp.confirm({ select = true })
       else
         fallback()
       end
