@@ -20,6 +20,7 @@ SRC_DIR=godot-master
 FORCE=0
 CLEAN=0
 ANDROID=0
+XBSDU=0
 
 VERSION=4
 TEMPLATE_DIR=$HOME/.local/share/godot/export_templates
