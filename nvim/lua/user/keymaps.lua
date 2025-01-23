@@ -2,6 +2,7 @@
 vim.keymap.set("", "<Space>", "<Nop>")
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
+vim.keymap.set('n', '<Esc>', ':nohlsearch<CR><Esc>')
 
 -- windows move, resize, ...
 vim.keymap.set('n', ',t', '<C-w>j')
