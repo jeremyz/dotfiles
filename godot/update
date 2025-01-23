@@ -44,6 +44,9 @@ do
     a)
       ANDROID=1
       ;;
+    x)
+      XBSDU=1
+      ;;
     c)
       CLEAN=1
       ;;
@@ -70,11 +73,17 @@ function build()
   echo -e "build : ${RED}$platform$RESET target=$RED$target$RESET"
   # shellcheck disable=SC2086
   time scons CXX="$CXX" platform=$platform target=$target $linux_flags $common_flags #warnings=no #custom_modules=../modules
+  if [ "$XBSDU" -eq 1 ]
+  then
+    time scons CXX="$CXX" platform=$platform target=template_release $linux_flags $common_flags
+    time scons CXX="$CXX" platform=$platform target=template_debug $linux_flags $common_flags
+    [ ! -d "$TEMPLATE_DIR" ] && mkdir "$TEMPLATE_DIR"
+      mv bin/godot.linuxbsd.template_release.x86_64.llvm "$TEMPLATE_DIR/linux_release.x86_64"
+      mv bin/godot.linuxbsd.template_debug.x86_64.llvm "$TEMPLATE_DIR/linux_debug.x86_64"
+  fi
 
   if [ $ANDROID -eq 1 ]
   then
-    [ ! -d "$TEMPLATE_DIR" ] && mkdir "$TEMPLATE_DIR"
-
     # https://docs.huihoo.com/godotengine/godot-docs/godot/reference/compiling_for_android.html
     [ $CLEAN -eq 1 ] && (pushd platform/android/java && echo -e "${RED}gradlew clean$RESET" && ./gradlew --no-daemon cleanGodotTemplates && popd || exit 1)
     for target in $targets;
@@ -96,8 +105,8 @@ function build()
     echo -e "${RED}gradlew build$RESET" && ./gradlew --no-daemon build
     echo -e "${RED}gradlew generateGodotTemplates$RESET" && ./gradlew --no-daemon generateGodotTemplates
     popd || exit 1
-
-    cp bin/android* "$TEMPLATE_DIR/"
+    [ ! -d "$TEMPLATE_DIR" ] && mkdir "$TEMPLATE_DIR"
+    mv bin/android* "$TEMPLATE_DIR/"
   fi
 }
 
