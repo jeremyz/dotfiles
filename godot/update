@@ -132,6 +132,4 @@ then
   git log "$HEAD_PREV"..
 fi
 
-strip ./bin/godot.*
-ls -lh ./bin/
 git_gc _godot_build
