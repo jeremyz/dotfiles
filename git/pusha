@@ -1,4 +1,5 @@
 #! /usr/bin/env bash
+git gc
 for remote in $(git remote -v | cut -f 1 | sort | uniq)
 do
   git push $remote
