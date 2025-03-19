@@ -35,8 +35,10 @@ require("lazy").setup({
       current_line_blame_formatter = '    <author>, <author_time:%R> - <summary>',
       on_attach = function(bufnr)
         local gitsigns = require('gitsigns')
+        vim.keymap.set('n', '<leader>gt', gitsigns.next_hunk, {})
+        vim.keymap.set('n', '<leader>gs', gitsigns.prev_hunk, {})
         vim.keymap.set('n', '<leader>gp', gitsigns.preview_hunk, {})
-        vim.keymap.set('n', '<leader>gt', gitsigns.toggle_current_line_blame, {})
+        vim.keymap.set('n', '<leader>gb', gitsigns.toggle_current_line_blame, {})
       end
     },
   },
