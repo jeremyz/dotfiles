@@ -37,6 +37,7 @@ require("lazy").setup({
         local gitsigns = require('gitsigns')
         vim.keymap.set('n', '<leader>gt', gitsigns.next_hunk, {})
         vim.keymap.set('n', '<leader>gs', gitsigns.prev_hunk, {})
+        vim.keymap.set('n', '<leader>gr', gitsigns.reset_hunk, {})
         vim.keymap.set('n', '<leader>gp', gitsigns.preview_hunk, {})
         vim.keymap.set('n', '<leader>gb', gitsigns.toggle_current_line_blame, {})
       end
