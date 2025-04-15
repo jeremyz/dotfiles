@@ -13,8 +13,6 @@ ignore = Name */.godot/*
 
 path = _wip
 
-path = usr/share
-
 path = usr/data
 ignore = Name usr/data/googleearth/Cache
 ignore = Name usr/data/googleearth/Temp
