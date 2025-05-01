@@ -35,6 +35,9 @@ export JDTLS_JVM_ARGS="-javaagent:$HOME/.local/share/nvim/mason/packages/jdtls/l
 export _ZO_ECHO=1
 eval "$(zoxide init --cmd cd bash)"
 
+# fix bash-completion
+complete -o default -o bashdefault inkscape
+
 # LS COLORS
 [ -r ~/.dir_colors ] && eval "$(dircolors ~/.dir_colors)"
 alias ls="ls --color=auto -F -b -T 0"
