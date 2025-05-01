@@ -27,6 +27,7 @@ export XDG_CONFIG_HOME="$HOME/.config"
 export ORACLE_PATH="$HOME/.config/oracle"
 export GPG_TTY=$(tty) # pinentry
 export JDTLS_JVM_ARGS="-javaagent:$HOME/.local/share/nvim/mason/packages/jdtls/lombok.jar"
+export GDK_SCALE=2 # Xft.dpi: 96
 
 # shellcheck source=/dev/null
 [ -r "$HOME/.config/local/bash.sh" ] && source "$HOME/.config/local/bash.sh"
