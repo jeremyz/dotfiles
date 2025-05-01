@@ -1,5 +1,9 @@
 #! /usr/bin/env bash
 
+[[ -n "${MYBASHRCSOURCED}" ]] && return
+MYBASHRCSOURCED="Y"
+
+
 # PROMPT
 function parse_git_branch()
 {
