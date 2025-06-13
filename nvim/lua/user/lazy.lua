@@ -20,10 +20,22 @@ require("lazy").setup({
   'lunarvim/darkplus.nvim',
   'morhetz/gruvbox',
   'jamessan/vim-gnupg',
-  'folke/todo-comments.nvim',
+  {
+    'folke/todo-comments.nvim',
+    config = function()
+      require('todo-comments').setup()
+    end,
+  },
   'tpope/vim-fugitive',
   'embear/vim-localvimrc',
-  'stevearc/oil.nvim',
+  {
+    'stevearc/oil.nvim',
+    config = function()
+
+      require('oil').setup()
+      vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory" })
+    end,
+  },
   {
     'lewis6991/gitsigns.nvim',
     opts = {
@@ -60,6 +72,9 @@ require("lazy").setup({
   {
     'nvim-lualine/lualine.nvim',
     dependencies = { 'nvim-tree/nvim-web-devicons' },
+    config = function()
+      require('lualine').setup()
+    end,
   },
   -- gc[N][motion]
   {
@@ -83,8 +98,30 @@ require("lazy").setup({
   {
     'neovim/nvim-lspconfig',
     dependencies = {
-      'williamboman/mason.nvim',
-      'williamboman/mason-lspconfig.nvim',
+      {
+        'williamboman/mason.nvim',
+        config = function()
+          require("mason").setup({
+            ui = { border = "rounded" }
+          })
+        end,
+      },
+      {
+        'williamboman/mason-lspconfig.nvim',
+        config = function()
+          require("mason-lspconfig").setup({
+            ensure_installed = {
+              "clangd",
+              "jdtls",
+              "jsonls",
+              "sqlls",
+              "bashls",
+              "rust_analyzer",
+              "solargraph",
+            },
+          })
+        end,
+      },
     },
   },
   -- CMP

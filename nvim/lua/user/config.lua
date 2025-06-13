@@ -1,11 +1,4 @@
 
-require('todo-comments').setup()
-
-require('oil').setup()
-vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory" })
-
-require('lualine').setup()
-
 -- TELESCOPE --
 local actions = require('telescope.actions')
 require('telescope').setup {
@@ -115,58 +108,58 @@ vim.api.nvim_create_autocmd('LspAttach', {
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
--- MASON --
-servers = {
-  'clangd',
-  'jdtls',
-  'jsonls',
-  'sqlls',
-  'bashls',
-  'rust_analyzer',
-  'solargraph',
-}
-servers_setup = {
-  -- help solargraph when working out of project
-  solargraph = {
-    root_dir = function()
-      local cwd = vim.fn.getcwd()
-      local root = require('lspconfig.util').root_pattern('Gemfile', '.git')(cwd)
-      if root then
-        return root
-      end
-      return vim.fs.dirname(vim.api.nvim_buf_get_name(0))
+
+vim.lsp.config('*', {
+  root_markers = { '.git' },
+})
+vim.lsp.config.solargraph = {
+  root_dir = function()
+    local cwd = vim.fn.getcwd()
+    local root = require('lspconfig.util').root_pattern('Gemfile', '.git')(cwd)
+    if root then
+      return root
     end
+    return vim.fs.dirname(vim.api.nvim_buf_get_name(0))
+  end
+}
+
+local java_executable = '/usr/lib/jvm/java-24-openjdk/bin/java'
+local jdtls_path = vim.fn.stdpath("data") .. "/mason/packages/jdtls"
+local launcher_jar = vim.fn.glob(jdtls_path .. "/plugins/org.eclipse.equinox.launcher_*.jar")
+local lombok_jar = vim.fn.glob(jdtls_path .. '/lombok.jar')
+local config_dir = jdtls_path .. '/config_linux/'
+local workspace_dir = vim.fn.stdpath('cache') .. '/jdtls/workspace/' .. vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
+vim.lsp.config.jdtls = {
+  cmd = {
+    java_executable,
+    '-Declipse.application=org.eclipse.jdt.ls.core.id1',
+    '-Dosgi.bundles.defaultStartLevel=4',
+    '-Declipse.product=org.eclipse.jdt.ls.core.product',
+    '-Dlog.protocol=true', -- Enable protocol logging (useful for debugging)
+    '-Dlog.level=ALL',
+    '-Xms1G', -- Initial heap size for JDTLS server
+    '-Xmx2G', -- Max heap size for JDTLS server
+    -- "--enable-native-access=ALL-UNNAMED", -- silences warnings
+    "-javaagent:" .. lombok_jar,
+    '-jar', launcher_jar,
+    '-configuration', config_dir,
+    '-data', workspace_dir,
   },
-  jdtls = {
-    settings = {
-      java = {
-        format = {
-          enabled = true
-        }
+  settings = {
+    java = {
+      format = {
+        enabled = true
       }
-    },
-    on_attach = function(client, bufnr)
-      client.server_capabilities.semanticTokensProvider = nil
-      vim.bo[bufnr].shiftwidth = 4
-      vim.bo[bufnr].tabstop = 4
-      vim.bo[bufnr].softtabstop = 4
-      vim.bo[bufnr].expandtab = true
-    end
-  }
-}
-require("mason").setup({
-  ui = { border = "rounded" }
-})
-require('mason-lspconfig').setup({
-  ensure_installed = servers,
-  handlers = {
-    function(server_name)
-      local server = servers_setup[server_name] or {}
-      server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-      require('lspconfig')[server_name].setup(server)
-    end,
+    }
   },
-})
+  on_attach = function(client, bufnr)
+    client.server_capabilities.semanticTokensProvider = nil
+    vim.bo[bufnr].shiftwidth = 4
+    vim.bo[bufnr].tabstop = 4
+    vim.bo[bufnr].softtabstop = 4
+    vim.bo[bufnr].expandtab = true
+  end
+}
 
 -- CMP --
 local kind_icons = {
