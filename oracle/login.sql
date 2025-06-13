@@ -1,3 +1,4 @@
+-- ORACLE_PATH=./config/oracle
 SET PAGESIZE 0
 SET NEWPAGE 0
 SET SPACE 0
