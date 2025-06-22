@@ -1,12 +1,7 @@
 #! /usr/bin/env bash
 
 cd ~/_wip || exit 1
-
-declare -a dirs=(code)
-declare -A clean_args=(
-["code",0]="./projects/ERP/code"
-["code",1]="mvn clean"
-)
+source "clean.cfg" || exit 1
 
 for dir in "${dirs[@]}"
 do
