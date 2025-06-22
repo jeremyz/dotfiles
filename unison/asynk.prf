@@ -10,6 +10,7 @@ root=ssh://jeyzu@erratic/_synk/
 
 ignore = Name *~
 ignore = Name */.godot/*
+ignore = Name *.class
 
 path = _wip
 

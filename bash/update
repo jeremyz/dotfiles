@@ -26,7 +26,9 @@ function sudo_run() {
 }
 
 function synk() {
-    [ -f ~/.unison/asynk.prf ] && echo -e "$RED ** unison asynk $RESET" && unison asynk.prf
+    [ -f ~/.unison/asynk.prf ] || return
+    wip_clean
+    echo -e "$RED ** unison asynk $RESET" && unison asynk.prf
 }
 
 function git_pull() {

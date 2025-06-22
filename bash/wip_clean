@@ -1,0 +1,16 @@
+#! /usr/bin/env bash
+
+cd ~/_wip || exit 1
+
+declare -a dirs=(code)
+declare -A clean_args=(
+["code",0]="./projects/ERP/code"
+["code",1]="mvn clean"
+)
+
+for dir in "${dirs[@]}"
+do
+  path=${clean_args["$dir",0]}
+  cmd=${clean_args["$dir",1]}
+  echo "clean $path" && pushd "$path" > /dev/null && $cmd > /dev/null && popd > /dev/null
+done
