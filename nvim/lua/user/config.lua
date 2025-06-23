@@ -110,18 +110,8 @@ capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp'
 
 
 vim.lsp.config('*', {
-  root_markers = { '.git' },
+  root_markers = { '.git', 'Gemfile'},
 })
-vim.lsp.config.solargraph = {
-  root_dir = function()
-    local cwd = vim.fn.getcwd()
-    local root = require('lspconfig.util').root_pattern('Gemfile', '.git')(cwd)
-    if root then
-      return root
-    end
-    return vim.fs.dirname(vim.api.nvim_buf_get_name(0))
-  end
-}
 
 local java_executable = '/usr/lib/jvm/java-24-openjdk/bin/java'
 local jdtls_path = vim.fn.stdpath("data") .. "/mason/packages/jdtls"
