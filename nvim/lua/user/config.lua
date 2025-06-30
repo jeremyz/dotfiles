@@ -75,9 +75,11 @@ local lsp_attach = function(event)
   -- map("<leader>l,", ts.lsp_type_definitions, 'Definition')  -- ,, is :pop
   map("<leader>le", vim.lsp.buf.hover, 'Hover')
   map("<leader>li", ts.lsp_references, 'Reference')
-  map("<leader>lu", ts.lsp_dynamic_workspace_symbols, 'Workspace Symbol')
+  map("<leader>lu", function() ts.lsp_dynamic_workspace_symbols({ default_text = vim.fn.expand("<cword>") }) end, 'Workspace Symbol')
   map("<leader>la", vim.lsp.buf.code_action, 'Code Action')
   map("<leader>lk", vim.lsp.buf.rename, 'Rename')
+  map("<leader>lg", function() ts.live_grep({ default_text = vim.fn.expand("<cword>") }) end, 'Live Grep')
+
   -- map("<leader>l", vim.lsp.buf.implementation, 'Implementation')
   -- map("i", "<leader>l", vim.lsp.buf.signature_help, 'Signature Help')
   -- map("<leader>l", vim.lsp.buf.declaration, 'Declaration')
