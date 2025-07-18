@@ -1,0 +1,43 @@
+#! /usr/bin/env ruby
+
+require 'fileutils'
+
+m2_repo_path = File.join(ENV['HOME'], '.m2', 'repository')
+
+paths = Dir.glob(File.join(m2_repo_path, '**', '*')).select do |path|
+  File.directory?(path) && File.basename(path).match?(/^\d+/)
+end
+paths = paths.sort_by { |path| File.basename(path) }.reverse
+
+def keep?(prev, new)
+  return true if prev =~ /Final/
+  return true if prev.size == new.size # same size -> rely on sort
+
+  s = [prev.size, new.size].min - 1
+  return true if prev[0..s] != new[0..s] # shortest prefix different -> rely on sort
+
+  prev.size < new.size # keep prev if shortest
+end
+
+data = {}
+offset = m2_repo_path.size + 1
+paths.each do |path|
+  a = path[offset..].split('/')
+  version = a[-1]
+  artifact = a[0..-2].join('.')
+
+  if data.key?(artifact)
+    v = data[artifact][:version]
+    if keep?(v, version)
+      FileUtils.rm_rf(path)
+      next
+    end
+    FileUtils.rm_rf(data[artifact][:path])
+  end
+
+  data[artifact] = {
+    path: path,
+    version: version,
+    artifact: artifact
+  }
+end
