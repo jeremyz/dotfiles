@@ -146,9 +146,9 @@ vim.lsp.config.jdtls = {
   },
   on_attach = function(client, bufnr)
     client.server_capabilities.semanticTokensProvider = nil
-    vim.bo[bufnr].shiftwidth = 4
-    vim.bo[bufnr].tabstop = 4
-    vim.bo[bufnr].softtabstop = 4
+    vim.bo[bufnr].shiftwidth = 2
+    vim.bo[bufnr].tabstop = 2
+    vim.bo[bufnr].softtabstop = 2
     vim.bo[bufnr].expandtab = true
   end
 }
