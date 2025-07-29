@@ -1,13 +1,13 @@
 [Default Applications]
 text/plain=geany.desktop
 application/pdf=org.gnome.Evince.desktop
-application/xhtml+xml=brave-browser-beta.desktop
-text/html=brave-browser-beta.desktop
-x-scheme-handler/http=brave-browser-beta.desktop
-x-scheme-handler/https=brave-browser-beta.desktop
-x-scheme-handler/about=brave-browser-beta.desktop
-x-scheme-handler/mailto=brave-browser-beta.desktop
-x-scheme-handler/unknown=brave-browser-beta.desktop
+application/xhtml+xml=brave-browser.desktop
+text/html=brave-browser.desktop
+x-scheme-handler/http=brave-browser.desktop
+x-scheme-handler/https=brave-browser.desktop
+x-scheme-handler/about=brave-browser.desktop
+x-scheme-handler/mailto=brave-browser.desktop
+x-scheme-handler/unknown=brave-browser.desktop
 x-scheme-handler/etcher=balena-etcher.desktop
 
 [Added Associations]
