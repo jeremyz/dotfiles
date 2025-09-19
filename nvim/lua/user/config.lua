@@ -152,6 +152,13 @@ vim.lsp.config.jdtls = {
     vim.bo[bufnr].expandtab = true
   end
 }
+vim.lsp.config.sqlls = {
+  settings = {
+    sqlls = {
+      dialect = 'postgresql',
+    },
+  },
+}
 
 -- CMP --
 local kind_icons = {
@@ -300,11 +307,11 @@ if gdproject then
 end
 -- :help lspconfig-setup
 -- https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/server_configurations/gdscript.lua
-require('lspconfig').gdscript.setup {
-  on_attach = lsp_attach
+vim.lsp.config.gdscript.setup = {
+  on_attach = lsp_attach,
 }
-require'lspconfig'.gdshader_lsp.setup {
-  on_attach = lsp_attach
+vim.lsp.config.gdscript.setup = {
+  on_attach = lsp_attach,
 }
 dap.adapters.godot = {
   type = 'server',
