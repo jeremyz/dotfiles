@@ -115,7 +115,7 @@ vim.lsp.config('*', {
   root_markers = { '.git', 'Gemfile'},
 })
 
-local java_executable = '/usr/lib/jvm/java-24-openjdk/bin/java'
+local java_executable = '/usr/lib/jvm/java-25-openjdk/bin/java'
 local jdtls_path = vim.fn.stdpath("data") .. "/mason/packages/jdtls"
 local launcher_jar = vim.fn.glob(jdtls_path .. "/plugins/org.eclipse.equinox.launcher_*.jar")
 local lombok_jar = vim.fn.glob(jdtls_path .. '/lombok.jar')
