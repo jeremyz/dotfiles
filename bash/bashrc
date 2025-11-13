@@ -53,7 +53,7 @@ set -o vi
 # catch and eval dmalloc output
 #function dmalloc { eval `command dmalloc -b $*`; }
 alias mutt=neomutt
-alias cat=bat
+#alias cat=bat
 alias vim=nvim
 alias v="nvim ."
 alias vimdiff="nvim -d"

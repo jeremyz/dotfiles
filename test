@@ -1,0 +1,3 @@
+brave-browser --force-device-scale-factor=2
+brave-browser --high-dpi-support=1 --force-device-scale-factor=2
+brave-browser --enable-hidpi=1
