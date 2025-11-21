@@ -3,6 +3,12 @@
 local actions = require('telescope.actions')
 require('telescope').setup {
   defaults = {
+    file_ignore_patterns = {
+      "%.git/",
+      "%.class",
+      "target/",
+      "build/",
+    },
     mappings = {
       i = {
         ["<A-s>"] = actions.move_selection_previous,
