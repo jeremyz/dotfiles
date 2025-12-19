@@ -39,11 +39,9 @@ function git_pull() {
 }
 
 function update_pkgs() {
-    sudo_run "pacman -Scc --noconfirm"
     sudo_run "pacman -Syu" || return
-    sudo_run "rm /var/cache/pacman/pkg/*"
-    run "yay -Sc --noconfirm"
-    run "yay -Syu"
+    run "yay -Syu" || return
+    sudo_run "pacman -Scc --noconfirm"
 }
 
 function update_gem() {
