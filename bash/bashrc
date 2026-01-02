@@ -58,7 +58,7 @@ alias vim=nvim
 alias v="nvim ."
 alias vimdiff="nvim -d"
 alias gvim='nvim --listen godothost .'
-alias tt='clear && task'
+alias tt='clear && task rc.gc=0'
 alias ddu='zcat ~/.cache/ncdu-data.gz | ncdu -f-'
 # alias fuck='eval $(thefuck $(fc -ln -1)); history -r'
 # alias sf='systemctl --user restart pipewire*'
