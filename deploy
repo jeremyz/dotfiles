@@ -31,6 +31,7 @@ link "git"                       ".config/git"
 link "ccache.conf"               ".config/ccache/ccache.conf"
 link "ruby/gemrc"                ".gemrc"
 link "ruby/rubocop"              ".config/rubocop"
+link "gemini/settings.json"      ".gemini/settings.json"
 
 link "mail/fdm.conf"             ".fdm.conf"
 link "mail/msmtprc"              ".config/msmtp/config"
