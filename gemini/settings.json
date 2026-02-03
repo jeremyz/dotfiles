@@ -5,6 +5,12 @@
     }
   },
   "general": {
-    "vimMode": true
+    "vimMode": false,
+    "previewFeatures": true
+  },
+  "ui": {
+    "footer": {
+      "hideContextPercentage": false
+    }
   }
 }
