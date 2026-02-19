@@ -39,7 +39,7 @@ vim.keymap.set('n', '<leader>th', builtin.help_tags)
 vim.keymap.set('n', '<leader>ts', function() builtin.grep_string({ search = vim.fn.input("Grep > ") }) end) -- needs ripgrep !!!
 
 -- TREESITTER --
-require('nvim-treesitter.configs').setup({
+require('nvim-treesitter').setup({
   ensure_installed = { 'bash', 'c', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc', 'java', 'ruby', 'rust' },
   -- Autoinstall languages that are not installed
   auto_install = true,
