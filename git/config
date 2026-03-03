@@ -43,3 +43,5 @@
 	name = Jérémy Zurcher
 [credential]
 	helper = store
+[init]
+	defaultBranch = master
