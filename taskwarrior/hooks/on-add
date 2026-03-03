@@ -1,0 +1,42 @@
+#! /usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'json'
+
+json = $stdin.read
+# args = ARGV[1].split(':')[1]
+# cmd = ARGV[2].split(':')[1]
+data = ARGV[4].split(':')[1]
+
+task = JSON.parse(json)
+if task['note'] == 'NO'
+  puts json
+  exit(0)
+end
+
+require 'fileutils'
+
+uuid = task['uuid']
+note = if task['project'].nil?
+         File.join(data, 'notes/new', "#{uuid}.md")
+       else
+         File.join(data, 'notes', task['project'], 'new', "#{uuid}.md")
+       end
+note_dir = File.dirname(note)
+FileUtils.mkdir_p(note_dir)
+template = File.join(data, 'notes', '0.md')
+
+if File.exist?(template)
+  content = File.read(template)
+                .sub(/UUID/, task['uuid'])
+                .sub(/TITLE/, task['description'])
+                .sub(/PROJECT/, task['project'])
+                .sub(/CREATION/, task['entry'])
+  File.write(note, content)
+else
+  File.write(note, '')
+end
+task['note'] = note
+
+puts task.to_json
+puts "NOTE ID : #{task['note']}"

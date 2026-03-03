@@ -1,0 +1,42 @@
+#! /usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'json'
+
+before = JSON.parse($stdin.gets.chomp)
+after = $stdin.gets.chomp
+_args = ARGV[1]
+_cmd = ARGV[2]
+data = ARGV[4].split(':')[1]
+
+if before['note'] == 'NO'
+  puts after
+  exit(0)
+end
+
+require 'fileutils'
+
+task = JSON.parse(after)
+uuid = task['uuid']
+prj = task['project'] || ''
+
+start = task['start']
+unless start.nil?
+  system("sed -i 's/\\[START\\]/[#{start}]/' #{task['note']}")
+  task['note'] = File.join(data, 'notes', prj, 'active', "#{uuid}.md")
+end
+
+done = task['end']
+unless done.nil?
+  system("sed -i 's/\\[COMPLETION\\]/[#{done}]/' #{task['note']}")
+  task['note'] = File.join(data, 'notes', prj, 'done', "#{uuid}.md")
+end
+
+if before['note'] != task['note']
+  note_dir = File.dirname(task['note'])
+  FileUtils.mkdir_p(note_dir)
+  FileUtils.mv(before['note'], task['note'])
+end
+
+puts task.to_json
+# puts " --- #{before.to_json} --- #{after}"

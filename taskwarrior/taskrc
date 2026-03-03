@@ -3,8 +3,9 @@ regex=on
 
 data.location=/home/jeyzu/usr/data/task/
 
-include /usr/share/doc/task/rc/dark-256.theme
+include /usr/share/doc/task/rc/dark-green-256.theme
 
+active.indicator=>
 default.project=Inbox
 
 uda.taskwarrior-tui.keyconfig.up=s
@@ -20,7 +21,17 @@ dateformat.annotation=D.M
 dateformat.report=D.M
 weekstart=monday
 
-# Priority
+# State : active / blocked / waiting / review
+uda.state.type=string
+uda.state.label=State
+uda.state.values=active,blocked,waiting,review
+color.uda.state.blocked=bold white on red
+
+# Note
+uda.note.type=string
+uda.note.label=Note
+
+# Priority : H / M / L
 uda.priority.type=string
 uda.priority.label=Priority
 uda.priority.values=H,M,L,
@@ -31,7 +42,7 @@ urgency.uda.priority.H.coefficient=6.0
 urgency.uda.priority.L.coefficient=1.8
 urgency.uda.priority.M.coefficient=3.9
 
-# Effort
+# Effort : s / m / l / xl / xxl
 uda.effort.type=string
 uda.effort.label=Effort
 uda.effort.values=s,m,l,xl,xxl
