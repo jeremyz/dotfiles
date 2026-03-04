@@ -6,15 +6,22 @@ require 'json'
 before = JSON.parse($stdin.gets.chomp)
 after = $stdin.gets.chomp
 _args = ARGV[1]
-_cmd = ARGV[2]
+cmd = ARGV[2]
 data = ARGV[4].split(':')[1]
 
-if before['note'] == 'NO'
+note = before['note']
+if note.nil? || note == 'NO' || !File.exist?(note)
   puts after
   exit(0)
 end
 
 require 'fileutils'
+
+if cmd == 'delete'
+  FileUtils.unlink(before['note'])
+  puts after
+  exit(0)
+end
 
 task = JSON.parse(after)
 uuid = task['uuid']
@@ -32,11 +39,10 @@ unless done.nil?
   task['note'] = File.join(data, 'notes', prj, 'done', "#{uuid}.md")
 end
 
-if before['note'] != task['note']
+if note != task['note']
   note_dir = File.dirname(task['note'])
   FileUtils.mkdir_p(note_dir)
   FileUtils.mv(before['note'], task['note'])
 end
 
 puts task.to_json
-# puts " --- #{before.to_json} --- #{after}"
