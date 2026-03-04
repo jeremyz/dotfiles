@@ -6,7 +6,6 @@ required_binaries=(git bat nvim rg neomutt fdm newsboat dbeaver pg_ctl sqlite3 m
 
 for binary in "${required_binaries[@]}"; do
   if ! which "$binary" &> /dev/null; then
-    echo -e "$RED[MISSING]$RESET $binary"
-    missing=true
+    echo -e "${RED}[MISSING]$RESET $binary"
   fi
 done
