@@ -1,0 +1,288 @@
+#! /usr/bin/env ruby
+
+# frozen_string_literal: true
+
+require 'date'
+require 'json'
+require 'tempfile'
+
+RESET = "\e[0m"
+ORANGE = "\e[33m"
+GREEN = "\e[32m"
+
+class Cli
+  def get_note(id)
+    note = `task _get #{id}.note`.chomp if id =~ /\d+/
+    note.nil? || note.empty? ? nil : note
+  end
+
+  def add_task(task)
+    cmd = 'task add '
+    %w[project description priority effort note due tags].each do |k|
+      v = task[k]
+      next unless v
+
+      case k
+      when 'description'
+        cmd += "#{k}:'#{v}' "
+      when 'tags'
+        v.each { cmd += "#{_1} " }
+      else
+        cmd += "#{k}:#{v} "
+      end
+    end
+    capture_task_id(cmd)
+  end
+
+  def capture_task_id(cmd)
+    output = `#{cmd} 2>&1`
+    if output =~ /Created task (\d+)\./
+      ::Regexp.last_match(1)
+    else
+      puts 'Failed to capture ID'
+      nil
+    end
+  end
+
+  def parse_note(input)
+    input =~ /-note/ ? 'NO' : nil
+  end
+
+  def parse_tag(input)
+    input =~ /\+\w+/ ? input : nil
+  end
+
+  PRIORITIES = %w[H L M].freeze
+  def parse_priority(input)
+    PRIORITIES.include?(input) ? input : nil
+  end
+
+  EFFORTS = %w[s m l xl xxl].freeze
+  def parse_effort(input)
+    EFFORTS.include?(input) ? input : nil
+  end
+
+  DUE = %w[DD-MM +xd +xw eow eom].freeze
+  def parse_due(input, today = Date.today, msg: true)
+    case input
+    when /^(\d{1,2})-(\d{1,2})$/
+      day = ::Regexp.last_match(1).to_i
+      month = ::Regexp.last_match(2).to_i
+      begin
+        target = Date.new(today.year, month, day)
+        target < today ? target.next_year : target
+      rescue Date::Error
+        puts "  '#{input}' is an invalid calendar date." if msg
+        nil
+      end
+    when /^\+(\d+)([dw])$/
+      amount = ::Regexp.last_match(1).to_i
+      unit = ::Regexp.last_match(2)
+      unit == 'd' ? today + amount : today + (amount * 7)
+    when 'eow'
+      today + (7 - today.cwday - 2)
+    when 'eom'
+      d = Date.new(today.year, today.month, -1)
+      d.cwday > 5 ? d - (d.cwday - 5) : d
+    when 'now', 'today'
+      Time.new(today.year, today.month, today.day, 18, 0, 0)
+    else
+      puts "  '#{input}' is not a recognized format. Use DD-MM, +xd, +xw, eow, or eom." if msg
+      nil
+    end
+  end
+end
+
+class Context
+  def initialize
+    @ctx = {
+      projects_db: 'projects.json',
+      databases: {
+        asynk: ['AsYnK', '~/usr/data/task', ''],
+        hmsa: ['HMSA', '~/usr/data/hmsa/task', '']
+      }
+    }
+    current_database
+    current_project
+  end
+
+  def current_database
+    location = `task _get rc.data.location`.chomp.delete_suffix('/')
+    key = @ctx[:databases].find { File.expand_path(_2[1]).delete_suffix('/') == location }[0]
+    self.database = @ctx[:databases].keys.index(key)
+  end
+
+  def current_project
+    p = Dir.pwd
+    prj = read_projects.find { File.expand_path(_1[1]) == p }
+    self.project = prj.nil? ? nil : prj[0]
+  end
+
+  def note_dirs(project)
+    %w[new active done].map { File.expand_path(File.join(@ctx[:databases][database][1], 'notes', project, _1)) }
+  end
+
+  def stats(project)
+    note_dirs(project).each_with_object([]) { |p, a| a << Dir.glob(File.join(p, '*')).count { |file| File.file?(file) } }
+  end
+
+  def project
+    @ctx[:project]
+  end
+
+  def project=(prj)
+    prj.nil? ? @ctx.delete(:project) : @ctx[:project] = prj
+  end
+
+  def database
+    @ctx[:database]
+  end
+
+  def databases
+    @ctx[:databases]
+  end
+
+  def database=(idx)
+    @ctx[:database] = databases.keys[idx]
+    @ctx[:base_dir] = databases[database][1]
+    @ctx.delete(:project)
+  end
+
+  def filename(*args)
+    File.expand_path(File.join(args.map { @ctx[_1] }))
+  end
+
+  def projects_path
+    filename(:base_dir, :projects_db)
+  end
+
+  def read_projects
+    File.exist?(projects_path) ? JSON.parse(File.read(projects_path))&.sort { _1[0] <=> _2[0] } : []
+  end
+end
+
+class InputParser
+  ACTIONS = %w[add edit note list now projects].freeze
+  def initialize(cli, ctx)
+    @cli = cli
+    @ctx = ctx
+    @editor = ENV['EDITOR']
+    @task = {
+      project: '',
+      description: '',
+      priority: '',
+      effort: '',
+      note: '',
+      due: '',
+      tags: []
+    }
+  end
+
+  def parse
+    action = 'list'
+    others = []
+    ARGV.each do |arg|
+      if ACTIONS.include?(arg)
+        action = arg
+        next
+      end
+      d = @cli.parse_due(arg, msg: false)
+      if d
+        @task[:due] = d
+      elsif arg =~ /\d+/ || arg == 'projects'
+        others << arg
+      elsif @cli.parse_priority(arg)
+        @task[:priority] = arg
+      elsif @cli.parse_effort(arg)
+        @task[:effort] = arg
+      elsif @cli.parse_tag(arg)
+        @task[:tags] << arg
+      elsif @cli.parse_note(arg)
+        @task[:note] = 'NO'
+      elsif arg =~ /^[A-Z]{3}/
+        @task[:project] = arg
+      elsif arg.size > 6
+        @task[:description] = arg
+      else
+        others << arg
+      end
+    end
+    @task[:project] = @ctx.project if @task[:project].empty? && @ctx.project
+    send(action, others)
+  end
+
+  def now(_params)
+    system('task now')
+  end
+
+  def projects(_params)
+    system('task projects')
+  end
+
+  def list(params)
+    puts "unhandled input(s) : #{params.inspect}" unless params.empty?
+    if (prj = @task[:project]).empty?
+      system('task')
+    else
+      system("task pro:#{prj}")
+      stats(prj)
+    end
+  end
+
+  def stats(project)
+    n = @ctx.stats(project)
+    t = n.sum
+    p = n.map { t.zero? ? 0 : (100 * _1 / t).to_i }.map { _1.to_s.rjust(3) }
+    n.map! { _1.to_s.rjust(3) }
+    puts
+    puts  "new    : #{n[0]} (#{p[0]} %)"
+    puts  "active : #{n[1]} (#{p[1]} %)"
+    puts  "done   : #{n[2]} (#{p[2]} %)"
+  end
+
+  def add(params)
+    puts "unhandled input(s) : #{params.inspect}" unless params.empty?
+    file = Tempfile.new('taskw')
+    file << JSON.pretty_generate(@task)
+    file.close
+    system("#{@editor} #{file.path}")
+    begin
+      @task = JSON.parse(File.read(file.path))
+    rescue JSON::ParserError
+      puts "ParserError -> #{ORANGE}abort#{RESET}"
+      exit(0)
+    end
+    file.unlink
+    id = @cli.add_task(@task)
+    puts "New Task ID: #{task_id}"
+    note([id]) unless id.nil?
+  end
+
+  def edit(params)
+    return if _missing(params)
+
+    params.each do |n|
+      system("task edit #{n}") if n =~ /\d+/
+      system("#{@editor} #{@ctx.projects_path}") if n == 'projects'
+    end
+  end
+
+  def note(params)
+    return if _missing(params)
+
+    params.each do |n|
+      note = @cli.get_note(n)
+      system("#{@editor} #{note}") if note
+    end
+  end
+
+  def _missing(params)
+    if params.empty?
+      puts 'missing task ID'
+      true
+    end
+    false
+  end
+end
+
+InputParser.new(Cli.new, Context.new).parse

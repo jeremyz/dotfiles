@@ -24,8 +24,8 @@ note = if task['project'].nil?
        end
 note_dir = File.dirname(note)
 FileUtils.mkdir_p(note_dir)
-template = File.join(data, 'notes', '0.md')
 
+template = File.join(data, 'notes', '0.md')
 if File.exist?(template)
   content = File.read(template)
                 .sub(/UUID/, task['uuid'])
@@ -39,4 +39,3 @@ end
 task['note'] = note
 
 puts task.to_json
-puts "NOTE ID : #{task['note']}"

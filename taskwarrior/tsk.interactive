@@ -1,0 +1,491 @@
+#! /usr/bin/env ruby
+
+# frozen_string_literal: true
+
+RESET = "\e[0m"
+ORANGE = "\e[33m"
+GREEN = "\e[32m"
+
+require 'date'
+require 'json'
+require 'tempfile'
+
+class Cli
+  def add_task(task)
+    cmd = 'task add '
+    %w[project description priority effort note due tags].each do |k|
+      v = task[k]
+      next unless v
+
+      case k
+      when 'description'
+        cmd += "#{k}:'#{v}' "
+      when 'tags'
+        v.each { cmd += "#{_1} " }
+      else
+        cmd += "#{k}:#{v} "
+      end
+    end
+    capture_task_id(cmd)
+  end
+
+  def capture_task_id(cmd)
+    output = `#{cmd} 2>&1`
+    if output =~ /Created task (\d+)\./
+      ::Regexp.last_match(1)
+    else
+      puts 'Failed to capture ID'
+      nil
+    end
+  end
+
+  def say(left, subject, right)
+    puts "  #{left} #{GREEN}#{subject}#{RESET} #{right}"
+  end
+
+  def yes_no_string(default)
+    case default
+    when nil   then 'y/n'
+    when true  then 'Y/n'
+    when false then 'y/N'
+    end
+  end
+
+  YES = %w[y yes].freeze
+  NO = %w[n no].freeze
+  def yes_no(prompt, default = nil)
+    c = yes_no_string(default)
+    print " => #{prompt} (#{c}) ? "
+    loop do
+      ret = $stdin.gets.chomp.strip.downcase
+      return true if YES.include? ret
+      return false if NO.include? ret
+      return default if ret.empty? && !default.nil?
+
+      puts "  '#{ret}' is not valid, (#{c}) ?"
+      print '  $ '
+    end
+  end
+
+  def reads(prompt, object)
+    print " => #{prompt} #{ORANGE}#{object}#{RESET}: "
+    $stdin.gets.chomp.strip
+  end
+
+  def read_validated(prompt, object, valid_options)
+    options_hint = "(#{valid_options.join('/')})"
+    loop do
+      print " => #{prompt} #{ORANGE}#{object}#{RESET} #{options_hint}: "
+      input = $stdin.gets.chomp.strip.downcase
+      return nil if input.empty?
+      return input if valid_options.map(&:to_s).map(&:downcase).include?(input)
+
+      puts "  '#{input}' is not a valid option. Please choose from: #{valid_options.join(', ')}"
+    end
+  end
+
+  def read_due(prompt)
+    loop do
+      print " => #{prompt} (#{DUE.join(', ')}): "
+      input = $stdin.gets.chomp.strip.downcase
+      return nil if input.empty?
+
+      ret = parse_due(input)
+      return ret if ret
+    end
+  end
+
+  DUE = %w[DD-MM +xd +xw eow eom].freeze
+  def parse_due(input, today = Date.today, msg: true)
+    case input
+    when /^(\d{1,2})-(\d{1,2})$/
+      day = ::Regexp.last_match(1).to_i
+      month = ::Regexp.last_match(2).to_i
+      begin
+        target = Date.new(today.year, month, day)
+        target < today ? target.next_year : target
+      rescue Date::Error
+        puts "  '#{input}' is an invalid calendar date." if msg
+        nil
+      end
+    when /^\+(\d+)([dw])$/
+      amount = ::Regexp.last_match(1).to_i
+      unit = ::Regexp.last_match(2)
+      unit == 'd' ? today + amount : today + (amount * 7)
+    when 'eow'
+      today + (7 - today.cwday - 2)
+    when 'eom'
+      d = Date.new(today.year, today.month, -1)
+      d.cwday > 5 ? d - (d.cwday - 5) : d
+    when 'now', 'today'
+      Time.new(today.year, today.month, today.day, 18, 0, 0)
+    else
+      puts "  '#{input}' is not a recognized format. Use DD-MM, +xd, +xw, eow, or eom." if msg
+      nil
+    end
+  end
+
+  def get_note(id)
+    note = `task _get #{id}.note`.chomp if id =~ /\d+/
+    note.nil? || note.empty? ? nil : note
+  end
+
+  def chose(prompt, list, offset: 0, quit: true, empty: false, newline: true)
+    puts if newline
+    puts " => #{prompt} :"
+    puts '-' * (prompt.size + 5 + offset)
+    list.each_with_index do |el, i|
+      puts "\t#{i + 1}) : #{block_given? ? yield(el) : el}"
+    end
+    puts "\tq) : Quit" if quit
+    print "\t$ "
+    read_int_or_quit(list.length, empty: empty)
+  end
+
+  def read_int_or_quit(max, empty: false)
+    loop do
+      s = $stdin.gets.chomp.strip
+      return -1 if s == 'q' || (empty && s.empty?)
+
+      if s =~ /^([0-9]+)$/
+        i = ::Regexp.last_match(1).to_i
+        return i - 1 if i.positive? && i <= max
+      end
+      puts "\t  #{s} is not valid, must be : [1..#{max}] or 'q'"
+      print "\t$ "
+    end
+  end
+end
+
+class Context
+  def initialize
+    @ctx = {
+      projects_db: 'projects.json',
+      databases: {
+        asynk: ['AsYnK', '~/usr/data/task', ''],
+        hmsa: ['HMSA', '~/usr/data/hmsa/task', '']
+      }
+    }
+    current_database
+    current_project
+  end
+
+  def current_database
+    location = `task _get rc.data.location`.chomp.delete_suffix('/')
+    key = @ctx[:databases].find { File.expand_path(_2[1]).delete_suffix('/') == location }[0]
+    self.database = @ctx[:databases].keys.index(key)
+  end
+
+  def current_project
+    p = Dir.pwd
+    prj = read_projects.find { File.expand_path(_1[1]) == p }
+    self.project = prj.nil? ? nil : prj[0]
+  end
+
+  def show
+    puts '-----'
+    @ctx.each do |k, v|
+      puts "#{k} : #{v.inspect}"
+    end
+    puts '-----'
+  end
+
+  def note_dirs(project)
+    %w[new active done].map { File.expand_path(File.join(@ctx[:databases][database][1], 'notes', project, _1)) }
+  end
+
+  def stats(project)
+    note_dirs(project).each_with_object([]) { |p, a| a << Dir.glob(File.join(p, '*')).count { |file| File.file?(file) } }
+  end
+
+  def title(label)
+    "#{GREEN}#{database.upcase}#{RESET} - #{ORANGE}#{label}#{RESET} - #{GREEN}#{project}#{RESET}"
+  end
+
+  def project
+    @ctx[:project]
+  end
+
+  def project=(prj)
+    prj.nil? ? @ctx.delete(:project) : @ctx[:project] = prj
+  end
+
+  def database
+    @ctx[:database]
+  end
+
+  def databases
+    @ctx[:databases]
+  end
+
+  def database=(idx)
+    @ctx[:database] = databases.keys[idx]
+    @ctx[:base_dir] = databases[database][1]
+    @ctx.delete(:project)
+  end
+
+  def filename(*args)
+    File.expand_path(File.join(args.map { @ctx[_1] }))
+  end
+
+  def projects_path
+    filename(:base_dir, :projects_db)
+  end
+
+  def read_projects
+    File.exist?(projects_path) ? JSON.parse(File.read(projects_path))&.sort { _1[0] <=> _2[0] } : []
+  end
+
+  def write_projects(projects)
+    File.write(projects_path, JSON.pretty_generate(projects))
+  end
+end
+
+class Task
+  attr_reader :cli, :ctx
+
+  def initialize(cli, ctx)
+    @cli = cli
+    @ctx = ctx
+  end
+
+  def description
+    self.class.name
+  end
+
+  def run
+    dependencies.each do |task_klass|
+      task_klass.new(@cli, @ctx).run
+    end
+    steps.each { |step_method| send(step_method) }
+    execute if respond_to?(:execute)
+  end
+
+  def dependencies
+    []
+  end
+
+  def steps
+    []
+  end
+
+  def tree(level = 0)
+    puts "#{' ' * level}\ #{description}"
+    dependencies.each do |task_klass|
+      task_klass.new(@cli, @ctx).tree(level + 1)
+    end
+    steps.each { puts "#{' ' * level} - #{_1}" }
+    puts "#{' ' * level} - Execute" if respond_to?(:execute)
+  end
+end
+
+class DatabaseMgmt < Task
+  def description
+    '* Select Database'
+  end
+
+  def run
+    databases = @ctx.databases
+    idx = @cli.chose(@ctx.title('Database'), databases.keys) { "#{databases[_1][0].ljust(10)} ( #{databases[_1][1]} )" }
+    return if idx == -1
+
+    @ctx.database = idx
+    @cli.say('database', databases.keys[idx], 'selected')
+  end
+end
+
+class ProjectAdd < Task
+  def description
+    '+ Add Project'
+  end
+
+  def run
+    name = @cli.reads('Enter project', 'name')
+    path = @cli.reads('Enter project', 'path')
+    return unless @cli.yes_no("add #{ORANGE}project#{RESET} : #{GREEN}#{name}#{RESET}", true)
+
+    prjs = @ctx.read_projects
+    prjs << [name, path]
+    @ctx.write_projects(prjs)
+    @cli.say('project', name, 'added')
+  end
+end
+
+class ProjectMgmt < Task
+  def description
+    '- Projects'
+  end
+
+  def dependencies
+    [ProjectAdd, ProjectSelect]
+  end
+
+  def run
+    loop do
+      idx = @cli.chose(@ctx.title('Project'), dependencies) { _1.new(@cli, @ctx).description }
+      return if idx == -1
+
+      dependencies[idx].new(@cli, @ctx).run
+      # @ctx.show
+    end
+  end
+end
+
+class ProjectSelect < Task
+  def description
+    '* Select Project'
+  end
+
+  def run
+    prjs = @ctx.read_projects
+    s = prjs.map { _1[0]&.length }.max + 3
+    i = @cli.chose(@ctx.title('Project'), prjs) { "#{_1[0].ljust(s)} (#{_1[1]})" }
+    @ctx.project = prjs[i][0]
+    @cli.say('project', prjs[i][0], 'selected')
+  end
+end
+
+class TaskAdd < Task
+  def description
+    '+ Task'
+  end
+
+  def run(skip_project: false)
+    @cmd = 'task add '
+    return unless descr
+
+    skip_project ? @cmd += "pro:#{@ctx.project} " : project
+    due
+    priority
+    effort
+    note
+    # FIXME : tags ?
+    return unless @cli.yes_no("execute #{ORANGE}#{@cmd}#{RESET}", false)
+
+    output = `#{@cmd} 2>&1`
+    if output =~ /Created task (\d+)\./
+      task_id = ::Regexp.last_match(1)
+      puts "New Task ID: #{task_id}"
+    else
+      puts 'Failed to capture ID'
+      return
+    end
+    note = @cli.get_note(task_id)
+    system('nvim', note) if note
+  end
+
+  def descr
+    d = @cli.reads('task', 'description')
+    if d.empty?
+      puts 'empty description ABORT'
+      return false
+    end
+    @cmd += "'#{d}' "
+  end
+
+  def project
+    p = @ctx.project
+    p = nil if p && !@cli.yes_no("linked to : #{@ctx.project}", true)
+    @cmd += "pro:#{p} " if p
+    return if p || !@cli.yes_no("linked to a #{ORANGE}project#{RESET}", false)
+
+    ProjectSelect.new(@cli, @ctx).run
+    p = @ctx.project
+    @cmd += "pro:#{p} "
+  end
+
+  def due
+    d = @cli.read_due("task #{ORANGE}due#{RESET} date")
+    return if d.nil?
+
+    @cmd += "due:#{d.strftime('%Y-%m-%d')} "
+  end
+
+  def priority
+    p = @cli.read_validated('task', 'priority', %w[H M L])
+    return if p.nil?
+
+    @cmd += "priority:#{p.upcase} "
+  end
+
+  def effort
+    list = ['< 1h', '< hours', '< 1day', 'days', 'XXL']
+    i = @cli.chose("task #{ORANGE}effort#{RESET}", list, offset: -10, quit: false, empty: true, newline: false)
+    f = i == -1 ? nil : %w[s m l xl xxl][i]
+    return if f.nil?
+
+    @cmd += "effort:#{f} "
+  end
+
+  def note
+    @cmd += 'note:NO ' unless @cli.yes_no('create a note', true)
+  end
+end
+
+class TaskList < Task
+  def description
+    '- Task List'
+  end
+
+  def run
+    # puts " => #{@ctx.title('Stats')} :"
+    system("task pro:#{@ctx.project}")
+  end
+end
+
+class Tree < Task
+  def run
+    Interactive.new(@cli, @ctx).tree
+  end
+
+  def tree(level); end
+end
+
+class Stats < Task
+  def run
+    n = @ctx.stats(project)
+    t = n.sum
+    p = n.map { t.zero? ? 0 : (100 * _1 / t).to_i }.map { _1.to_s.rjust(3) }
+    n.map! { _1.to_s.rjust(3) }
+    # puts " => #{@ctx.title('Stats')} :"
+    puts
+    puts  "new    : #{n[0]} (#{p[0]} %)"
+    puts  "active : #{n[1]} (#{p[1]} %)"
+    puts  "done   : #{n[2]} (#{p[2]} %)"
+  end
+end
+
+class Interactive < Task
+  def run
+    @ctx.database && @ctx.project ? run_project : run_global
+  end
+
+  # if @ctx.database && @ctx.project &&
+  #    @cli.yes_no("add #{GREEN}Task#{RESET} linked to #{ORANGE}#{@ctx.project}#{RESET}", true)
+  #   TaskAdd.new(@cli, @ctx).run(skip_project: true)
+  #   return
+  # end
+  def run_project
+    dependencies = [TaskAdd, TaskList, Stats]
+    Stats.new(@cli, @ctx).run
+    TaskList.new(@cli, @ctx).run
+    loop do
+      idx = @cli.chose(@ctx.title('Root'), dependencies, offset: -23) { _1.new(@cli, @ctx).description }
+      return if idx == -1
+
+      dependencies[idx].new(@cli, @ctx).run
+    end
+  end
+
+  def run_global
+    dependencies = [TaskAdd, TaskList, ProjectMgmt, DatabaseMgmt, Tree]
+    loop do
+      idx = @cli.chose(@ctx.title('Root'), dependencies, offset: -23) { _1.new(@cli, @ctx).description }
+      return if idx == -1
+
+      dependencies[idx].new(@cli, @ctx).run
+    end
+  end
+end
+
+Interactive.new(Cli.new, Context.new).run
