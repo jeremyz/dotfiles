@@ -96,7 +96,6 @@ require("lazy").setup({
   -- TELESCOPE
   {
     'nvim-telescope/telescope.nvim', -- needs ripgrep
-    branch = '0.1.x',
     requires = { {'nvim-lua/plenary.nvim'} },
   },
   -- TREESITTER
