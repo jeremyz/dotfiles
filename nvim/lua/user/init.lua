@@ -2,7 +2,6 @@ require 'user.options'
 require 'user.keymaps'
 require 'user.bepo'
 require 'user.lazy'
-require 'user.config'
 require 'user.colors'
 -- require 'user.netrw'
 
