@@ -91,6 +91,20 @@ class Cli
       nil
     end
   end
+
+  def colorise(list, color = ORANGE)
+    "#{color}#{list.join("#{RESET} - #{color}")}#{RESET}"
+  end
+
+  def help
+    puts "\tpriorities  : #{colorise(PRIORITIES)}"
+    puts "\tefforrts    : #{colorise(EFFORTS)}"
+    puts "\tdue         : #{colorise(DUE)}"
+    puts "\tnote        : #{ORANGE}-note#{RESET}"
+    puts "\ttags        : #{ORANGE}+tag#{RESET}"
+    puts "\tprojectr    : #{ORANGE}project#{RESET}"
+    puts "\tdescription : #{ORANGE}description#{RESET}"
+  end
 end
 
 class Context
@@ -178,7 +192,15 @@ class InputParser
     }
   end
 
+  def help
+    puts 'HELP !'
+    puts "posible actions : #{@cli.colorise(ACTIONS, GREEN)}"
+    @cli.help
+    exit 0
+  end
+
   def parse
+    help if ARGV.include?('help')
     action = 'list'
     others = []
     ARGV.each do |arg|
@@ -189,7 +211,7 @@ class InputParser
       d = @cli.parse_due(arg, msg: false)
       if d
         @task[:due] = d
-      elsif arg =~ /\d+/ || arg == 'projects'
+      elsif arg =~ /^\d+$/ || arg == 'projects'
         others << arg
       elsif @cli.parse_priority(arg)
         @task[:priority] = arg
@@ -199,7 +221,7 @@ class InputParser
         @task[:tags] << arg
       elsif @cli.parse_note(arg)
         @task[:note] = 'NO'
-      elsif arg =~ /^[A-Z]{3}/
+      elsif arg =~ /^[A-Z]{3,}(\.[a-zA-Z0-9]{3,})*$/
         @task[:project] = arg
       elsif arg.size > 6
         @task[:description] = arg
@@ -254,7 +276,7 @@ class InputParser
     end
     file.unlink
     id = @cli.add_task(@task)
-    puts "New Task ID: #{task_id}"
+    puts "New Task ID: #{id}"
     note([id]) unless id.nil?
   end
 
@@ -272,7 +294,7 @@ class InputParser
 
     params.each do |n|
       note = @cli.get_note(n)
-      system("#{@editor} #{note}") if note
+      system("#{@editor} #{note}") if note && note != 'NO'
     end
   end
 

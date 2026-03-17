@@ -71,5 +71,6 @@ link "efl/efl-build-fcts"        "bin/efl-build-fcts"
 link "git/each_repo"             "bin/each_repo"
 link "git/gc"                    "bin/git_gc"
 link "git/pusha"                 "bin/pusha"
+link "taskwarrior/tsk"           "bin/tsk"
 
 ./bash/check_binaries
