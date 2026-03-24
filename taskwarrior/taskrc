@@ -70,7 +70,7 @@ news.version=3.4.2
 report.now.description=10 following tasks
 report.now.labels=ID,Active,Age,Deps,P,Effort,Project,Tag,Recur,S,Due,Until,Description,Urg
 report.now.columns=id,start.age,entry.age,depends,priority,effort,project,tags,recur,scheduled.countdown,due.relative,until.remaining,description,urgency
-report.now.filter=status:pending limit:10
+report.now.filter=status:pending limit:30 -hide
 report.now.sort=due+,priority-
 
 context.hmsa.read=+hmsa

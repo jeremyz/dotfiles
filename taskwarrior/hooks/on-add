@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require 'json'
+require 'time'
 
 json = $stdin.read
 # args = ARGV[1].split(':')[1]
@@ -31,7 +32,7 @@ if File.exist?(template)
                 .sub(/\[UUID\]/, task['uuid'])
                 .sub(/\[TITLE\]/, task['description'])
                 .sub(/\[PROJECT\]/, task['project'])
-                .sub(/\[CREATION\]/, task['entry'])
+                .sub(/\[CREATION\]/, Time.parse(task['entry']).strftime('%Y-%m-%d %H:%M:%S UTC'))
   File.write(note, content)
 else
   File.write(note, '')

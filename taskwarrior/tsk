@@ -39,7 +39,7 @@ class Cli
     if output =~ /Created task (\d+)\./
       ::Regexp.last_match(1)
     else
-      puts 'Failed to capture ID'
+      puts "Failed to capture ID (#{output})"
       nil
     end
   end
@@ -52,7 +52,7 @@ class Cli
     input =~ /\+\w+/ ? input : nil
   end
 
-  PRIORITIES = %w[H L M].freeze
+  PRIORITIES = %w[L M H].freeze
   def parse_priority(input)
     PRIORITIES.include?(input) ? input : nil
   end
@@ -277,7 +277,7 @@ class InputParser
     file.unlink
     id = @cli.add_task(@task)
     puts "New Task ID: #{id}"
-    note([id]) unless id.nil?
+    note([id]) unless id.nil? || @task[:note] == 'NO'
   end
 
   def edit(params)
@@ -294,7 +294,14 @@ class InputParser
 
     params.each do |n|
       note = @cli.get_note(n)
-      system("#{@editor} #{note}") if note && note != 'NO'
+      next if note.nil?
+
+      if note == 'NO'
+        # 
+        # 
+      else
+        system("#{@editor} #{note}") if note
+      end
     end
   end
 

@@ -27,15 +27,17 @@ task = JSON.parse(after)
 uuid = task['uuid']
 prj = task['project'] || ''
 
+require 'time'
+
 start = task['start']
 unless start.nil?
-  system("sed -i 's/\\[START\\]/[#{start}]/' #{task['note']}")
+  system("sed -i 's/\\[START\\]/[#{Time.parse(start).strftime('%Y-%m-%d %H:%M:%S UTC')}]/' #{task['note']}")
   task['note'] = File.join(data, 'notes', prj, 'active', "#{uuid}.md")
 end
 
 done = task['end']
 unless done.nil?
-  system("sed -i 's/\\[COMPLETION\\]/[#{done}]/' #{task['note']}")
+  system("sed -i 's/\\[COMPLETION\\]/[#{Time.parse(done).strftime('%Y-%m-%d %H:%M:%S UTC')}]/' #{task['note']}")
   task['note'] = File.join(data, 'notes', prj, 'done', "#{uuid}.md")
 end
 
