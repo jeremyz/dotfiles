@@ -7,6 +7,9 @@ WMNG=/opt/efl/bin/enlightenment_start
 
 ${WIN:-$WMNG} & PID=$!
 
+# needs xdg-desktop-portal-gtk
+dbus-update-activation-environment --systemd DISPLAY XDG_CURRENT_DESKTOP=GTK GDK_DPI_SCALE=1.8
+
 # toooo annaying
 # if [ "$(which xkblayout-state 2>/dev/null)" ]
 # then

@@ -15,6 +15,7 @@ link "bash/bash_profile"         ".bash_profile"
 link "bash/dircolors-dark"       ".dir_colors"
 link "bash/xinitrc"              ".xinitrc"
 link "bash/Xresources"           ".Xresources"
+link "bash/portals.conf"         ".config/xdg-desktop-portal/portals.conf"
 
 link "pipewire/10-disable-camera.conf"            ".config/wireplumber/wireplumber.conf.d/10-disable-camera.conf"
 
