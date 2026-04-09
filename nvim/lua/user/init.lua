@@ -5,6 +5,13 @@ require 'user.lazy'
 require 'user.colors'
 -- require 'user.netrw'
 
+vim.filetype.add({
+  extension = {
+    gd = "gdscript",
+    tscn = "gdscript",
+  },
+})
+
 vim.api.nvim_create_autocmd("BufReadPost", {
   callback = function()
     -- if vim.bo.ft ~= "netrw" then

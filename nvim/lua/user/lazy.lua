@@ -98,35 +98,31 @@ require("lazy").setup({
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
   },
-  -- LSP
+  -- MASON
   {
-    'neovim/nvim-lspconfig',
-    dependencies = {
-      {
-        'williamboman/mason.nvim',
-        config = function()
-          require("mason").setup({
-            ui = { border = "rounded" }
-          })
-        end,
-      },
-      {
-        'williamboman/mason-lspconfig.nvim',
-        config = function()
-          require("mason-lspconfig").setup({
-            ensure_installed = {
-              "clangd",
-              "jdtls",
-              "jsonls",
-              "sqlls",
-              "bashls",
-              "rust_analyzer",
-              "solargraph",
-            },
-          })
-        end,
-      },
-    },
+    'williamboman/mason.nvim',
+    config = function()
+      require("mason").setup({
+        ui = { border = "rounded" }
+      })
+    end,
+  },
+  {
+    'williamboman/mason-lspconfig.nvim',
+    config = function()
+      require("mason-lspconfig").setup({
+        ensure_installed = {
+          "clangd",
+          "jdtls",
+          "jsonls",
+          "sqlls",
+          "bashls",
+          "rust_analyzer",
+          "solargraph",
+        },
+        automatic_installation = true,
+      })
+    end,
   },
   -- CMP
   {
@@ -209,7 +205,6 @@ require('nvim-treesitter').setup({
 })
 
 -- LSP UI --
-require('lspconfig.ui.windows').default_options.border = 'rounded'
 vim.diagnostic.config({
   virtual_text = false,
   float = {
@@ -223,8 +218,16 @@ vim.diagnostic.config({
 })
 
 -- LSP --
-vim.lsp.set_log_level('off')
+vim.lsp.config('*', {
+  root_markers = { '.git', 'Gemfile'},
+})
+
+-- vim.lsp.log.set_level("debug")
 local lsp_attach = function(event)
+  local bufnr = type(event) == "table" and event.buf or event
+  if type(bufnr) ~= "number" then
+      return
+  end
   local ts = require('telescope.builtin')
   local map = function(keys, func, desc)
     vim.keymap.set('n', keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
@@ -233,14 +236,13 @@ local lsp_attach = function(event)
   map('<leader>t', vim.diagnostic.goto_next, 'Next Diagnostic')
   map("<leader>=", vim.lsp.buf.format, 'Format')
   map("<leader>l,", ts.lsp_definitions, 'Definition')  -- ,, is :pop
-  -- map("<leader>l,", ts.lsp_type_definitions, 'Definition')  -- ,, is :pop
   map("<leader>le", vim.lsp.buf.hover, 'Hover')
   map("<leader>li", ts.lsp_references, 'Reference')
   map("<leader>lu", function() ts.lsp_dynamic_workspace_symbols({ default_text = vim.fn.expand("<cword>") }) end, 'Workspace Symbol')
   map("<leader>la", vim.lsp.buf.code_action, 'Code Action')
   map("<leader>lk", vim.lsp.buf.rename, 'Rename')
   map("<leader>lg", function() ts.live_grep({ default_text = vim.fn.expand("<cword>") }) end, 'Live Grep')
-
+  -- map("<leader>l,", ts.lsp_type_definitions, 'Definition')  -- ,, is :pop
   -- map("<leader>l", vim.lsp.buf.implementation, 'Implementation')
   -- map("i", "<leader>l", vim.lsp.buf.signature_help, 'Signature Help')
   -- map("<leader>l", vim.lsp.buf.declaration, 'Declaration')
@@ -248,19 +250,6 @@ local lsp_attach = function(event)
   -- map('<leader>ds', ts.lsp_document_symbols, '[D]ocument [S]ymbols')
   -- map('<leader>ws', ts.lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
   -- map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
-
-  -- highlight references of the word under the cursor
-  local client = vim.lsp.get_client_by_id(event.data.client_id)
-  if client and client.server_capabilities.documentHighlightProvider then
-    vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
-      buffer = event.buf,
-      callback = vim.lsp.buf.document_highlight,
-    })
-    vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
-      buffer = event.buf,
-      callback = vim.lsp.buf.clear_references,
-    })
-  end
 end
 
 vim.api.nvim_create_autocmd('LspAttach', {
@@ -271,18 +260,13 @@ vim.api.nvim_create_autocmd('LspAttach', {
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
-
-vim.lsp.config('*', {
-  root_markers = { '.git', 'Gemfile'},
-})
-
 local java_executable = '/usr/lib/jvm/java-26-openjdk/bin/java'
 local jdtls_path = vim.fn.stdpath("data") .. "/mason/packages/jdtls"
 local launcher_jar = vim.fn.glob(jdtls_path .. "/plugins/org.eclipse.equinox.launcher_*.jar")
 local lombok_jar = vim.fn.glob(jdtls_path .. '/lombok.jar')
 local config_dir = jdtls_path .. '/config_linux/'
 local workspace_dir = vim.fn.stdpath('cache') .. '/jdtls/workspace/' .. vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
-vim.lsp.config.jdtls = {
+local jdtls_config = {
   cmd = {
     java_executable,
     '-Declipse.application=org.eclipse.jdt.ls.core.id1',
@@ -298,6 +282,7 @@ vim.lsp.config.jdtls = {
     '-configuration', config_dir,
     '-data', workspace_dir,
   },
+  filetypes = { 'java' },
   settings = {
     java = {
       format = {
@@ -313,13 +298,59 @@ vim.lsp.config.jdtls = {
     vim.bo[bufnr].expandtab = true
   end
 }
-vim.lsp.config.sqlls = {
-  settings = {
-    sqlls = {
-      dialect = 'postgresql',
+
+local lsp_configs = {
+  bashls = {
+    cmd = { 'bash-language-server', 'start' },
+    filetypes = { 'sh', 'bash' },
+  },
+  clangd = {
+    cmd = { 'clangd' },
+    filetypes = { 'c', 'cpp', 'objc', 'objcpp' },
+  },
+  gdscript = {
+    cmd = { vim.fn.exepath('nc'), '127.0.0.1', '6005' },
+    filetypes = { 'gdscript' },
+    root_markers = { 'project.godot', '.git' },
+  },
+  jdtls = jdtls_config,
+  jsonls = {
+    cmd = { 'vscode-json-language-server', '--stdio' },
+    filetypes = { 'json' },
+  },
+  rust_analyzer = {
+    cmd = { 'rust-analyzer' },
+    filetypes = { 'rust' },
+    root_markers = { "Cargo.toml", "rust-project.json", ".git" },
+    root_dir = vim.fs.root(0, { "Cargo.toml", "rust-project.json" }),
+    settings = {
+      ["rust-analyzer"] = {
+        check = {  -- Changed from checkOnSave
+          command = "clippy",  -- Changed from checkOnSave.command
+        },
+        linkedProjects = { "Cargo.toml" },
+      },
     },
   },
+  sqlls = {
+    cmd = { 'sql-language-server', 'up', '--method', 'stdio' },
+    filetypes = { 'sql' },
+    settings = {
+      sqlls = {
+        dialect = 'postgresql',
+      },
+    },
+  },
+  solargraph = {
+    cmd = { 'solargraph', 'stdio' },
+    filetypes = { 'ruby' },
+  },
 }
+
+for name, config in pairs(lsp_configs) do
+  vim.lsp.config(name, config)
+  vim.lsp.enable(name)
+end
 
 -- CMP --
 local kind_icons = {
@@ -444,42 +475,35 @@ dap.listeners.after.event_initialized['dapui_config'] = dapui.open
 dap.listeners.before.event_terminated['dapui_config'] = dapui.close
 dap.listeners.before.event_exited['dapui_config'] = dapui.close
 
--- GDSCRIPT
+-- GDSCRIPT Logic --
 vim.api.nvim_create_autocmd( "FileType", {
   pattern = "gdscript",
   callback = function()
-    vim.opt.tabstop = 4
-    vim.opt.expandtab = false
-    local map = vim.api.nvim_buf_set_keymap
-    local opts = { noremap = true, silent = true }
-    map(0, 'n', '<F4>', ':GodotRunLast<CR>', opts)
-    map(0, 'n', '<F5>', ':GodotRun<CR>', opts)
-    map(0, 'n', '<F6>', ':GodotRunCurrent<CR>', opts)
-    map(0, 'n', '<F7>', ':GodotRunFZF<CR>', opts)
+    vim.opt_local.tabstop = 4
+    vim.opt_local.expandtab = false
+    local opts = { buffer = true, noremap = true, silent = true }
+    vim.keymap.set('n', '<F4>', ':GodotRunLast<CR>', opts)
+    vim.keymap.set('n', '<F5>', ':GodotRun<CR>', opts)
+    vim.keymap.set('n', '<F6>', ':GodotRunCurrent<CR>', opts)
+    vim.keymap.set('n', '<F7>', ':GodotRunFZF<CR>', opts)
   end
 })
--- nvim --listen /tmp/godotsocket
--- nvim --server /tmp/godotsocket --remote-send "<C-\><C-N>:n {file}<CR>:call cursor({line},{col})<CR>"
+
+--- nvim --listen /tmp/godotsocket
+--- nvim --server /tmp/godotsocket --remote-send "<C-\><C-N>:n {file}<CR>:call cursor({line},{col})<CR>"
+-- Godot Socket for External Editor communication
 local godot_socket = '/tmp/godotsocket'
-local gdproject = io.open(vim.fn.getcwd()..'/project.godot', 'r')
-if gdproject then
-  io.close(gdproject)
+if vim.fn.filereadable(vim.fn.getcwd()..'/project.godot') == 1 then
   vim.fn.serverstart(godot_socket)
 end
--- :help lspconfig-setup
--- https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/server_configurations/gdscript.lua
-vim.lsp.config.gdscript.setup = {
-  on_attach = lsp_attach,
-}
-vim.lsp.config.gdscript.setup = {
-  on_attach = lsp_attach,
-}
+
+-- :help dap-configuration
 dap.adapters.godot = {
   type = 'server',
   host = '127.0.0.1',
   port = '6006',
 }
--- :help dap-configuration
+
 dap.configurations.gdscript = {
   {
     type = 'godot',

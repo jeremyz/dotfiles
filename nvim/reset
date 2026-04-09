@@ -4,3 +4,8 @@ rm -rf ~/.cache/nvim
 rm -rf ~/.config/nvim
 rm -rf ~/.local/share/nvim
 rm -rf ~/.local/state/nvim
+
+mkdir -p ~/.config/nvim
+cd ~/.config/nvim
+ln -s ~/usr/dotfiles/nvim/lua
+ln -s ~/usr/dotfiles/nvim/init.lua
