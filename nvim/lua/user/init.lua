@@ -30,5 +30,3 @@ vim.api.nvim_create_autocmd("VimLeave", {
     end
   end,
 })
-
--- vim.lsp.set_log_level("debug")
