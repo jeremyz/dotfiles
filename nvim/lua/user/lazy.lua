@@ -86,12 +86,7 @@ require("lazy").setup({
       require('lualine').setup()
     end,
   },
-  -- gc[N][motion]
-  {
-    'numToStr/Comment.nvim',
-    opts = { },
-    lazy = false,
-  },
+  -- GODOT
   { 'habamax/vim-godot', event = 'VimEnter' },
   -- TELESCOPE
   {
