@@ -3,7 +3,8 @@ regex=on
 
 data.location=/home/jeyzu/usr/data/task/
 
-include /usr/share/doc/task/rc/dark-green-256.theme
+include /usr/share/doc/task/rc/dark-yellow-green.theme
+#include /usr/share/doc/task/rc/dark-green-256.theme
 
 active.indicator=>
 default.project=Inbox
