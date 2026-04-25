@@ -7,7 +7,7 @@ export LOCAL_CONF=$DIR/efl-build.conf
 source "$HOME/bin/efl-build-fcts"
 [ -r $LOCAL_CONF ] && source $LOCAL_CONF
 
-declare -a cfgs=(efl e terminology enigmatic evisum rage ephoto)
+declare -a cfgs=(efl e terminology enigmatic evisum rage ephoto edi)
 declare -A build_cfgs=(
 ["efl",0]="core/efl"
 ["efl",1]="-Defl-one=true -Doptimization=2 -Dharfbuzz=true -Dbuild-examples=false -Dbuild-tests=false -Ddrm=true -Dwl=true -Dbindings="
@@ -32,7 +32,7 @@ declare -A build_cfgs=(
 ["extra",2]="USE_MESON"
 ["profiler",0]="devs/nikawhite/efl_profiler_viewer"
 ["enventor",0]="tools/enventor"
-["edi",0]="tools/edi"
+["edi",0]="apps/edi"
 ["edi",2]="USE_MESON"
 ["eflete",0]="tools/eflete"
 ["eflete",1]="--enable-enventor"
