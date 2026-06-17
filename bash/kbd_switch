@@ -1,0 +1,27 @@
+#! /usr/bin/sh
+
+# Typematrix : 1e54:2030
+#SUBSYSTEM=="input", ATTRS{idVendor}=="1e54", ATTRS{idProduct}=="2030", RUN+="/home/jeyzu/bin/kbd_switch $env{ACTION}"
+# ExtraDox : feed:1990
+#SUBSYSTEM=="input", ATTRS{idVendor}=="feed", ATTRS{idProduct}=="1990", RUN+="/home/jeyzu/bin/kbd_switch $env{ACTION}"
+
+
+ACTION=$1
+
+if [ "$ACTION" = "add" ]; then
+
+    UPTIME=$(cut -d. -f1 /proc/uptime)
+    if [ "$UPTIME" -lt 30 ]; then
+        sleep 4
+    fi
+
+    /usr/bin/loadkeys "fr-bepo"
+    exit 0
+fi
+
+if [ "$ACTION" = "remove" ]; then
+    if ! lsusb | grep -qE "(feed:1990|05a4:9841|extradox|typematrix)"
+    then
+        /usr/bin/loadkeys "fr_CH"
+    fi
+fi
