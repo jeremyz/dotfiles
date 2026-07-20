@@ -26,6 +26,11 @@ function ApplyColorscheme(scheme)
   hl(0, "WinSeparator", { fg = "#008f11", bg = "None" })
   hl(0, "StatusLine", { fg = "#008f11", bg = "#000000" })
   hl(0, "GitSignsCurrentLineBlame", { fg = "#12a123", bg = "#000000" })
+
+  hl(0, 'DiffAdd',    { bg = '#208020' })
+  hl(0, 'DiffChange', { bg = '#303080' })
+  hl(0, 'DiffDelete', { bg = '#802020' })
+  hl(0, 'DiffText',   { bg = '#3030a0' })
 end
 
 --ApplyColorscheme('gruvbox')
