@@ -23,7 +23,7 @@ TEMPLATE_DIR=$TEMPLATE_DIR/$VERSION.x
 platform=linuxbsd
 target=editor
 targets="template_release template_debug"
-common_flags="use_llvm=yes linker=lld debug_symbols=no lto=none use_static_cpp=no" # arch does not provide libatomic.a through gcc-libs
+common_flags="use_llvm=yes linker=lld debug_symbols=no lto=none use_static_cpp=no accesskit=no" # arch does not provide libatomic.a through gcc-libs
 linux_flags="tools=yes colored=yes pulseaudio=no bits=64 warnings=no" #custom_modules=../modules
 
 CXX="ccache clang++"
