@@ -41,6 +41,7 @@
 	rebase = true
 [user]
 	name = Jérémy Zurcher
+	email = jeremy@asynk.ch
 [credential]
 	helper = store
 [init]
