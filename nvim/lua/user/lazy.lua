@@ -147,7 +147,16 @@ require("lazy").setup({
   -- SQL
   'tpope/vim-dadbod',
   'kristijanhusak/vim-dadbod-ui',   -- ~/.local/share/db_ui/connections.json
-  'kristijanhusak/vim-dadbod-completion'
+  'kristijanhusak/vim-dadbod-completion',
+  -- markdown
+  {
+      'MeanderingProgrammer/render-markdown.nvim',
+      dependencies = { 'nvim-treesitter/nvim-treesitter' },
+      -- , 'nvim-mini/mini.nvim' },         -- if you use the mini.nvim suite
+      -- , 'nvim-mini/mini.icons' },        -- if you use standalone mini plugins
+      -- , 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
+      opts = {},
+  }
 })
 
 -- TELESCOPE --
