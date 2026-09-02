@@ -10,6 +10,7 @@ x-scheme-handler/mailto=brave-browser.desktop
 x-scheme-handler/unknown=brave-browser.desktop
 x-scheme-handler/etcher=balena-etcher.desktop
 x-scheme-handler/magnet=transmission-gtk.desktop
+x-scheme-handler/rpi-imager=com.raspberrypi.rpi-imager-uri-handler.desktop
 
 [Added Associations]
 text/csv=libreoffice-calc.desktop;
