@@ -214,6 +214,7 @@ require('nvim-treesitter').setup({
 })
 
 -- LSP UI --
+vim.env.PATH = vim.fn.stdpath("data") .. "/mason/bin:" .. vim.env.PATH
 vim.diagnostic.config({
   virtual_text = false,
   float = {
@@ -228,14 +229,14 @@ vim.diagnostic.config({
 
 -- LSP --
 vim.lsp.config('*', {
-  root_markers = { '.git', 'Gemfile'},
+  root_markers = { '.git', 'Gemfile' },
 })
 
 -- vim.lsp.log.set_level("debug")
 local lsp_attach = function(event)
   local bufnr = type(event) == "table" and event.buf or event
   if type(bufnr) ~= "number" then
-      return
+    return
   end
   local ts = require('telescope.builtin')
   local map = function(keys, func, desc)
@@ -265,33 +266,40 @@ vim.api.nvim_create_autocmd('LspAttach', {
   group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
   callback = lsp_attach,
 })
---  create new capabilities with nvim cmp, and then broadcast that to the servers.
+
+-- Prepare nvim-cmp capabilities for native LSP
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
-local java_executable = '/usr/lib/jvm/java-26-openjdk/bin/java'
+-- JDTLS Path Setup
+local java_executable = '/usr/lib/jvm/java-27-openjdk/bin/java'
 local jdtls_path = vim.fn.stdpath("data") .. "/mason/packages/jdtls"
 local launcher_jar = vim.fn.glob(jdtls_path .. "/plugins/org.eclipse.equinox.launcher_*.jar")
-local lombok_jar = vim.fn.glob(jdtls_path .. '/lombok.jar')
-local config_dir = jdtls_path .. '/config_linux/'
-local workspace_dir = vim.fn.stdpath('cache') .. '/jdtls/workspace/' .. vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
+local lombok_jar = jdtls_path .. '/lombok.jar'
+local config_dir = jdtls_path .. '/config_linux'
+
+local root_dir = vim.fs.root(0, { ".git", "mvnw", "gradlew", "pom.xml", "build.gradle" }) or vim.fn.getcwd()
+local project_name = vim.fn.fnamemodify(root_dir, ":p:h:t")
+local workspace_dir = vim.fn.stdpath('cache') .. '/jdtls/workspace/' .. project_name
+
 local jdtls_config = {
   cmd = {
     java_executable,
     '-Declipse.application=org.eclipse.jdt.ls.core.id1',
     '-Dosgi.bundles.defaultStartLevel=4',
     '-Declipse.product=org.eclipse.jdt.ls.core.product',
-    '-Dlog.protocol=true', -- Enable protocol logging (useful for debugging)
+    '-Dlog.protocol=true',
     '-Dlog.level=ALL',
-    '-Xms1G', -- Initial heap size for JDTLS server
-    '-Xmx2G', -- Max heap size for JDTLS server
-    -- "--enable-native-access=ALL-UNNAMED", -- silences warnings
-    "-javaagent:" .. lombok_jar,
+    '-Xms1G',
+    '-Xmx2G',
+    '-javaagent:' .. lombok_jar,
     '-jar', launcher_jar,
     '-configuration', config_dir,
     '-data', workspace_dir,
   },
   filetypes = { 'java' },
+  root_markers = { ".git", "mvnw", "gradlew", "pom.xml", "build.gradle" },
+  capabilities = capabilities,
   settings = {
     java = {
       format = {
@@ -312,30 +320,34 @@ local lsp_configs = {
   bashls = {
     cmd = { 'bash-language-server', 'start' },
     filetypes = { 'sh', 'bash' },
+    capabilities = capabilities,
   },
   clangd = {
     cmd = { 'clangd' },
     filetypes = { 'c', 'cpp', 'objc', 'objcpp' },
+    capabilities = capabilities,
   },
   gdscript = {
     cmd = { vim.fn.exepath('nc'), '127.0.0.1', '6005' },
     filetypes = { 'gdscript' },
     root_markers = { 'project.godot', '.git' },
+    capabilities = capabilities,
   },
   jdtls = jdtls_config,
   jsonls = {
     cmd = { 'vscode-json-language-server', '--stdio' },
     filetypes = { 'json' },
+    capabilities = capabilities,
   },
   rust_analyzer = {
     cmd = { 'rust-analyzer' },
     filetypes = { 'rust' },
     root_markers = { "Cargo.toml", "rust-project.json", ".git" },
-    root_dir = vim.fs.root(0, { "Cargo.toml", "rust-project.json" }),
+    capabilities = capabilities,
     settings = {
       ["rust-analyzer"] = {
-        check = {  -- Changed from checkOnSave
-          command = "clippy",  -- Changed from checkOnSave.command
+        check = {
+          command = "clippy",
         },
         linkedProjects = { "Cargo.toml" },
       },
@@ -344,6 +356,7 @@ local lsp_configs = {
   sqlls = {
     cmd = { 'sql-language-server', 'up', '--method', 'stdio' },
     filetypes = { 'sql' },
+    capabilities = capabilities,
     settings = {
       sqlls = {
         dialect = 'postgresql',
@@ -353,6 +366,7 @@ local lsp_configs = {
   solargraph = {
     cmd = { 'solargraph', 'stdio' },
     filetypes = { 'ruby' },
+    capabilities = capabilities,
   },
 }
 
