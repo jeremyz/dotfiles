@@ -29,6 +29,8 @@ link "nvim/init.lua"             ".config/nvim/init.lua"
 link "tmux/tmux.conf"            ".config/tmux/tmux.conf"
 link "tmux/sessions"             ".config/tmux/sessions"
 
+link "pi/settings.json"          ".pi/agent/settings.json"
+
 link "git"                       ".config/git"
 link "ccache.conf"               ".config/ccache/ccache.conf"
 link "ruby/gemrc"                ".gemrc"
