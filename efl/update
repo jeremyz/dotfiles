@@ -7,7 +7,7 @@ export LOCAL_CONF=$DIR/efl-build.conf
 source "$HOME/bin/efl-build-fcts"
 [ -r $LOCAL_CONF ] && source $LOCAL_CONF
 
-declare -a cfgs=(efl e terminology evisum rage ephoto edi echart)
+declare -a cfgs=(efl e terminology evisum rage ephoto edi echart eclair xdg)
 declare -A build_cfgs=(
 ["efl",0]="core/efl"
 ["efl",1]="-Defl-one=true -Doptimization=2 -Dharfbuzz=true -Dbuild-examples=false -Dbuild-tests=false -Ddrm=true -Dwl=true -Dbindings="
@@ -27,6 +27,10 @@ declare -A build_cfgs=(
 ["edi",2]="USE_MESON"
 ["echart",0]="apps/echart"
 ["echart",2]="USE_MESON"
+["eclair",0]="netstar/eclair"
+["eclair",2]="USE_MESON"
+["xdg",0]="raster/xdg-desktop-portal-efl"
+["xdg",2]="USE_MESON"
 
 ["clouseau",0]="tools/clouseau"
 ["eruler",0]="apps/eruler"
