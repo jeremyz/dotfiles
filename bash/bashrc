@@ -9,7 +9,28 @@ function parse_git_branch()
 {
     git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
 }
-export PS1='\[\033[01;33m\]\u\[\033[01;35m\]@\[\033[00;31m\]\h\[\033[00m\]:\[\033[0;33m\] \W \[\033[01;35m\]$(parse_git_branch)\[\033[0;33m\] \[\033[0m\]\$ '
+# current dir name; at the root of a linked git worktree, the project name
+# (the dir holding the bare repo / .git), not the worktree dir
+function prompt_dir()
+{
+    local top gitdir common name
+    { read -r top; read -r gitdir; read -r common; } < <(git rev-parse --path-format=absolute --show-toplevel --git-dir --git-common-dir 2> /dev/null)
+    if [[ -n "$common" && "$gitdir" != "$common" && "$PWD" == "$top" ]]; then
+        name=${common##*/}
+        if [[ "$name" == .git || "$name" == .bare ]]; then
+            name=${common%/*}; name=${name##*/}
+        else
+            name=${name%.git}
+        fi
+        printf '%s' "$name"
+    elif [[ "$PWD" == "$HOME" ]]; then
+        printf '~'
+    else
+        name=${PWD##*/}
+        printf '%s' "${name:-/}"
+    fi
+}
+export PS1='\[\033[01;33m\]\u\[\033[01;35m\]@\[\033[00;31m\]\h\[\033[00m\]:\[\033[0;33m\] $(prompt_dir) \[\033[01;35m\]$(parse_git_branch)\[\033[0;33m\] \[\033[0m\]\$ '
 unset PROMPT_COMMAND
 
 # DPI
