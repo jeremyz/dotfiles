@@ -35,9 +35,11 @@ export PKG_CONFIG_PATH=$PREFIX"/lib/pkgconfig"
 
 GIT_PULL=${GIT_PULL:-1}
 BUILD_ANYWAY=${BUILD_ANYWAY:-0}
+USE_MAKE=${USE_MAKE:-0}
+USE_MESON=${USE_MESON:-1}
 BUILD_DIR=${BUILD_DIR:-"build"}
 USE_BUILD_DIR=${USE_BUILD_DIR:-1}
-TRY_CMAKE=${TRY_CMAKE:-1}
+TRY_CMAKE=${TRY_CMAKE:-0}
 
 TAGS_PATH=$HOME"/share/ctags/efl.tags"
 
@@ -91,21 +93,22 @@ function build()
    local autogen_flags=" --prefix=${PREFIX} $2"
    local extra=$3
 
-   local use_make=0
-   local use_meson=0
+   local use_make=$USE_MAKE
+   local use_meson=$USE_MESON
    local try_cmake=$TRY_CMAKE
    local use_build_dir=$USE_BUILD_DIR
+   local force_build=0
    for ef in $extra; do
-      [ "$ef" = "USE_MAKE" ] && use_make=1
-      [ "$ef" = "USE_MESON" ] && use_meson=1
       [ "$ef" = "NO_CMAKE" ] && try_cmake=0
       [ "$ef" = "NO_BUILD_DIR" ] && use_build_dir=0
+      [ "$ef" = "FORCE_BUILD" ] && force_build=1
    done
 
    local build_dir="$src_dir"
    [ "$use_build_dir" -eq 1 ] && build_dir="$src_dir/$BUILD_DIR/"
 
    local do_build=$BUILD_ANYWAY
+   [ "$force_build" -eq 1 ] && do_build=1
 
    echo -e "\n==== work on $PURPLE${src_dir##*/}$RESET in $GREEN$build_dir$RESET"
    pushd "$src_dir" > /dev/null || fatal "pushd"
